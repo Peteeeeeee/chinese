@@ -384,19 +384,19 @@
     max-width: 90%;
   }
 
-  /* Mode 2 Countdown Timer Bar */
+  /* 📏 Mode 2 改進版時間進度條：固定放置在遊戲畫面正上方，再也不會跑版消失 */
   #timer-bar-container {
     display: none;
-    position: absolute;
-    left: 15%; right: 15%;
+    width: 80%;
+    margin: 8px auto 0 auto;
     height: 10px;
     background: rgba(255,255,255,0.4);
     border-radius: 8px;
     border: 1.5px solid #fff;
     overflow: hidden;
     z-index: 4;
+    position: relative;
   }
-  #timer-bar-container.active { display: block; }
   #timer-bar-fill {
     width: 100%; height: 100%;
     background: linear-gradient(90deg, #8C7AE6, #FF6B6B);
@@ -596,6 +596,10 @@
         <span id="hud-speed-label">⚡ Live Speed: Spd 1</span>
         <input type="range" id="hud-speed-range" class="speed-slider" min="1" max="10" value="1" style="margin:0; flex:1;">
       </div>
+      
+      <div id="timer-bar-container">
+        <div id="timer-bar-fill"></div>
+      </div>
     </div>
 
     <div id="play-area">
@@ -604,10 +608,6 @@
       <div id="listening-ui">
         <button class="audio-big-btn" id="btn-replay-audio">🔊</button>
         <div class="listening-tip" id="listening-status-text">Listen carefully and tap the keyboard below!</div>
-      </div>
-
-      <div id="timer-bar-container">
-        <div id="timer-bar-fill"></div>
       </div>
       
       <div id="pause-overlay">
@@ -752,7 +752,6 @@
   var GROUND_PERCENT = 88; 
   var AUDIO_BASE = "https://language.moe.gov.tw/001/Upload/files/site_content/M0001/juyin/html_ch/audio/";
   
-  /* 🛠️ 錯字徹底修復：原本寫成 "開" 的地方，已經正確修正為 "ㄕ" */
   var CANONICAL_ORDER = [
     "ㄅ","ㄆ","ㄇ","ㄈ","ㄉ","ㄊ","ㄋ","ㄌ","ㄍ","ㄎ","ㄏ","ㄐ","ㄑ","ㄒ","ㄓ","ㄔ","ㄕ","ㄖ","ㄗ","ㄘ","ㄙ",
     "ㄚ","ㄛ","ㄜ","ㄝ","ㄞ","ㄟ","ㄠ","ㄡ","ㄢ","ㄣ","ㄤ","ㄥ","ㄦ",
@@ -990,7 +989,6 @@
     }, delay);
   }
 
-  /* 🛡️ 新增的安全防死鎖機制：若音檔真的卡住，0.8秒後自動強制解鎖，絕不卡死網頁 */
   function generateListeningQuestion(generateNew) {
     if(!state.playing || state.gameMode !== 2) return;
     if(activePool.length === 0) return;
@@ -1233,16 +1231,16 @@
     if(id === 'screen-over') state.activeScreen = 'over';
   }
 
+  /* 🛠️ 重新理清介面隱藏與呈現邏輯，確保進度條容器在聽力模式正常展開 */
   function setupGameLayout() {
     if(state.gameMode === 1) {
       groundLine.style.display = 'block';
       listeningUi.classList.remove('active');
-      timerBarContainer.classList.remove('active');
+      timerBarContainer.style.display = 'none'; 
     } else {
       groundLine.style.display = 'none';
       listeningUi.classList.add('active');
-      timerBarContainer.classList.add('active');
-      timerBarContainer.style.bottom = '10px'; 
+      timerBarContainer.style.display = 'block'; 
     }
   }
 
