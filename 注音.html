@@ -41,11 +41,11 @@
   }
   .display{font-family:'Baloo 2', 'Noto Sans TC', sans-serif;}
 
-  /* 📱 移動端完美適應容器：防止任何手機瀏覽器高度拉伸破圖 */
+  /* 📱 移動端完美適應容器 */
   #stage{
     width: 100vw;
     height: 100vh;
-    height: -webkit-fill-available; /* 修正 iOS Safari 的 100vh 問題 */
+    height: -webkit-fill-available; 
     max-width: 480px;   
     position: relative;
     display: flex;
@@ -54,7 +54,6 @@
     background: linear-gradient(180deg, var(--sky-top) 0%, var(--sky-bottom) 55%, var(--grass) 55%, #4CBB7E 100%);
   }
   
-  /* 💻 電腦版大螢幕時的優化外觀 */
   @media (min-width: 481px) and (min-height: 500px) {
     #stage {
       border: 6px solid #1f2937;
@@ -322,9 +321,6 @@
     background:repeating-linear-gradient(90deg, var(--fence) 0 14px, #2f7a4f 14px 16px);
     z-index:3;
   }
-  #ground-line.flash{
-    background:repeating-linear-gradient(90deg, var(--coral) 0 14px, var(--coral-dark) 14px 16px);
-  }
 
   /* Mode 1 Element */
   .falling{
@@ -407,7 +403,7 @@
     overflow: hidden;
     z-index: 4;
   }
-  #timer-bar-container.active { display: block; }
+  #timer-bar-container.active { block; }
   #timer-bar-fill {
     width: 100%; height: 100%;
     background: linear-gradient(90deg, #8C7AE6, #FF6B6B);
@@ -427,10 +423,10 @@
     to{opacity:0; transform:translateY(-25px);}
   }
 
-  /* ⌨️ 緊湊行動端優化注音鍵盤：自適應按鍵高度與內襯 */
+  /* ⌨️ 注音鍵盤 */
   #keyboard{
     background:#EAF3FB;
-    padding:4px 4px env(safe-area-inset-bottom, 8px); /* 留出 iPhone 底部黑條安全區 */
+    padding:4px 4px env(safe-area-inset-bottom, 8px); 
     z-index:5;
     position:relative;
     border-top:1.5px solid #d5e6f5;
@@ -445,7 +441,7 @@
   .key{
     flex:1;
     max-width:42px;
-    height: 38px; /* 縮小按鍵高度，釋放螢幕空間 */
+    height: 38px; 
     background:#fff;
     border:none;
     border-radius:5px;
@@ -461,12 +457,6 @@
   .key:active{transform:translateY(1px); box-shadow:0 1px 0 rgba(31,58,95,0.12); background:#f0f4f8;}
   .key.ghost { background:transparent; box-shadow:none; }
   .key.ghost .zh{color:#b9c9dd; font-size:10px;}
-  .kb-note{
-    text-align:center;
-    font-size:9px;
-    color:#7f93ab;
-    margin-top:2px;
-  }
 
   /* ---- Pause Overlay ---- */
   #pause-overlay {
@@ -770,7 +760,7 @@
   var AUDIO_BASE = "https://language.moe.gov.tw/001/Upload/files/site_content/M0001/juyin/html_ch/audio/";
   
   var CANONICAL_ORDER = [
-    "ㄅ","ㄆ","ㄇ","ㄈ","ㄉ","ㄊ","ㄋ","ㄌ","ㄍ","ㄎ","ㄏ","ㄐ","ㄑ","ㄒ","ㄓ","ㄔ","ㄕ","ㄖ","ㄗ","ㄘ","ㄙ",
+    "ㄅ","ㄆ","ㄇ","ㄈ","ㄉ","ㄊ","ㄋ","ㄌ","ㄍ","ㄎ","ㄏ","ㄐ","ㄑ","ㄒ","ㄓ","ㄔ","開","ㄖ","ㄗ","ㄘ","ㄙ",
     "ㄚ","ㄛ","ㄜ","ㄝ","ㄞ","ㄟ","ㄠ","ㄡ","ㄢ","ㄣ","ㄤ","ㄥ","ㄦ",
     "ㄧ","ㄨ","ㄩ"
   ];
@@ -949,7 +939,7 @@
     return {
       spawnInterval: Math.max(900, spawnInterval),
       fallDuration: Math.max(4000, fallDuration),
-      m2Limit: Math.max(2000, m2Limit)
+      m2Limit: Math.max(2200, m2Limit)
     };
   }
 
@@ -1004,6 +994,7 @@
     }, delay);
   }
 
+  /* 🛠️ 重構聽力核心邏輯：確保音檔完全隨機、狀態正確重置、生命值沒完絕不結束 */
   function generateListeningQuestion(generateNew) {
     if(!state.playing || state.gameMode !== 2) return;
     if(activePool.length === 0) return;
@@ -1012,7 +1003,7 @@
 
     state.mode2IsWaitingForNext = true;
     replayAudioBtn.classList.add('waiting');
-    listeningStatusText.textContent = "Loading audio...";
+    listeningStatusText.textContent = "🎧 Loading Next Sound...";
     timerBarFill.style.width = '100%';
 
     if (generateNew) {
@@ -1028,11 +1019,11 @@
       if(!state.playing || state.paused) return;
       playPronunciation(state.currentQuestion, function() {
         if(!state.playing || state.paused) return;
-        state.mode2IsWaitingForNext = false;
+        state.mode2IsWaitingForNext = false; // 解除鍵盤鎖定
         replayAudioBtn.classList.remove('waiting');
-        listeningStatusText.textContent = "Listen & tap the key!";
+        listeningStatusText.textContent = "Listen & Tap the correct key!";
       });
-    }, 150);
+    }, 200);
   }
 
   function tick(now){
@@ -1070,17 +1061,18 @@
       }
     } 
     else if (state.gameMode === 2) {
+      // 只有在非等待狀態下，時間條才會倒數
       if (!state.mode2IsWaitingForNext) {
         state.mode2TimeLeft -= deltaTime;
         if (state.mode2TimeLeft <= 0) {
           state.mode2TimeLeft = 0;
           timerBarFill.style.width = '0%';
-          state.mode2IsWaitingForNext = true;
-          replayAudioBtn.classList.add('waiting');
+          
+          // 逾時沒輸入：扣血、原地重考
           deductPointsOrLife();
           if (state.lives > 0) {
             playKlaxonHorn(function() {
-              generateListeningQuestion(false);
+              generateListeningQuestion(false); // false 代表原地考同一題
             });
           }
         } else {
@@ -1161,20 +1153,23 @@
       replayAudioBtn.classList.add('waiting');
 
       if (symbol === state.currentQuestion) {
+        // 答對了！
         var areaRect = playArea.getBoundingClientRect();
         showFloatingScore(areaRect.width/2 - 25, 30, '+5 Pts', '#8C7AE6');
         processSuccess();
-        playPronunciation(symbol, function() {
-          listeningStatusText.textContent = "Nice! Next in 0.8s...";
-          setTimeout(function() {
-            generateListeningQuestion(true);
-          }, 800); 
-        });
+        
+        listeningStatusText.textContent = "🎉 Correct! Perfect!";
+        setTimeout(function() {
+          if(!state.playing || state.paused) return;
+          generateListeningQuestion(true); // true 代表出下一道新題目
+        }, 600);
       } else {
+        // 答錯了！原地重播同一題
         deductPointsOrLife();
         if (state.lives > 0) {
+          listeningStatusText.textContent = "❌ Wrong! Listen again...";
           playKlaxonHorn(function() {
-            generateListeningQuestion(false);
+            generateListeningQuestion(false); // false 代表考原本那一題
           });
         }
       }
@@ -1213,6 +1208,8 @@
     if (state.gameMode === 1) {
       fallingItems.forEach(function(item) { item.startTime += pauseDuration; });
       scheduleNextSpawn(Math.max(50, spawnTimeLeft));
+    } else if (state.gameMode === 2) {
+      // 聽力模式暫停回來，直接讓倒數繼續
     }
     pauseOverlay.classList.remove('active');
   }
