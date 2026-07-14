@@ -1,0 +1,1074 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>注音快手</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Noto+Sans+TC:wght@500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --sky-top:#5EC3F0;
+    --sky-bottom:#CDEFFF;
+    --sun:#FFC857;
+    --grass:#5FC98D;
+    --fence:#3E8F63;
+    --ink:#1F3A5F;
+    --card:#FFFFFF;
+    --coral:#FF6B6B;
+    --coral-dark:#E5484D;
+    --purple:#8C7AE6;
+    --shadow: 0 8px 0 rgba(31,58,95,0.15);
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{height:100%;}
+  body{
+    margin:0;
+    font-family:'Noto Sans TC', sans-serif;
+    color:var(--ink);
+    background:linear-gradient(180deg,var(--sky-top) 0%, var(--sky-bottom) 55%, var(--grass) 55%, #4CBB7E 100%);
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    overflow-x:hidden;
+    -webkit-user-select:none;
+    user-select:none;
+  }
+  .display{font-family:'Baloo 2', 'Noto Sans TC', sans-serif;}
+
+  #stage{
+    width:100%;
+    max-width:480px;
+    min-height:100vh;
+    position:relative;
+    display:flex;
+    flex-direction:column;
+    overflow:hidden;
+  }
+
+  /* ---------- decorative sky ---------- */
+  .cloud{
+    position:absolute;
+    background:#fff;
+    border-radius:50px;
+    opacity:0.85;
+    filter:drop-shadow(0 4px 0 rgba(255,255,255,0.4));
+  }
+  .sun{
+    position:absolute;
+    top:18px; right:24px;
+    width:56px; height:56px;
+    border-radius:50%;
+    background:radial-gradient(circle at 35% 35%, #FFE29A, var(--sun));
+    box-shadow:0 0 0 8px rgba(255,200,87,0.25);
+    z-index:0;
+  }
+
+  /* ---------- screens ---------- */
+  .screen{
+    display:none;
+    flex:1;
+    position:relative;
+    z-index:2;
+    flex-direction:column;
+  }
+  .screen.active{display:flex;}
+
+  /* ---- start screen ---- */
+  #screen-start{
+    align-items:center;
+    justify-content:center;
+    padding:24px;
+    text-align:center;
+  }
+  .title-card{
+    background:var(--card);
+    border-radius:28px;
+    padding:32px 24px 28px;
+    box-shadow:var(--shadow);
+    max-width:340px;
+    width:100%;
+  }
+  .logo-symbols{
+    font-size:15px;
+    letter-spacing:6px;
+    color:var(--purple);
+    font-weight:700;
+    margin-bottom:6px;
+  }
+  h1.game-title{
+    font-family:'Baloo 2','Noto Sans TC',sans-serif;
+    font-size:40px;
+    margin:0 0 6px;
+    color:var(--ink);
+    font-weight:800;
+    letter-spacing:2px;
+  }
+  .subtitle{
+    font-size:14px;
+    color:#5b7291;
+    margin:0 0 22px;
+    line-height:1.6;
+  }
+  .rules{
+    text-align:left;
+    background:#F4F9FF;
+    border-radius:16px;
+    padding:14px 16px;
+    font-size:13px;
+    line-height:1.9;
+    color:#3a5170;
+    margin-bottom:22px;
+  }
+  .rules b{color:var(--ink);}
+  .high-score-pill{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    background:#FFF3D6;
+    color:#946200;
+    font-weight:700;
+    font-size:13px;
+    padding:6px 14px;
+    border-radius:999px;
+    margin-bottom:18px;
+  }
+  button.primary{
+    font-family:'Baloo 2','Noto Sans TC',sans-serif;
+    background:var(--coral);
+    color:#fff;
+    border:none;
+    font-size:20px;
+    font-weight:700;
+    padding:14px 40px;
+    border-radius:999px;
+    box-shadow:0 6px 0 var(--coral-dark);
+    cursor:pointer;
+    transition:transform .05s ease;
+  }
+  button.primary:active{transform:translateY(4px); box-shadow:0 2px 0 var(--coral-dark);}
+
+  /* ---- game screen ---- */
+  #screen-game{padding:0;}
+  #hud{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:12px 14px;
+    background:rgba(255,255,255,0.55);
+    backdrop-filter:blur(4px);
+    z-index:5;
+    position:relative;
+  }
+  #hearts{display:flex; gap:3px;}
+  .heart{font-size:20px; filter:drop-shadow(0 2px 0 rgba(0,0,0,0.08));}
+  .heart.lost{opacity:0.25; filter:none;}
+  #hud-right{display:flex; align-items:center; gap:8px;}
+  .stat{
+    font-family:'Baloo 2',sans-serif;
+    font-weight:700;
+    font-size:15px;
+    background:#fff;
+    border-radius:12px;
+    padding:5px 10px;
+    box-shadow:0 3px 0 rgba(31,58,95,0.1);
+  }
+  #score-stat{color:var(--purple);}
+  .hud-btn{
+    background:#fff;
+    border:none;
+    border-radius:12px;
+    width:32px;height:32px;
+    font-size:15px;
+    box-shadow:0 3px 0 rgba(31,58,95,0.1);
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+  .hud-btn:active{transform:translateY(2px); box-shadow:0 1px 0 rgba(31,58,95,0.1);}
+
+  #play-area{
+    position:relative;
+    flex:1;
+    min-height:300px;
+    overflow:hidden;
+    background:linear-gradient(180deg,var(--sky-top) 0%, var(--sky-bottom) 100%);
+  }
+  .cloud-anim{animation:drift linear infinite;}
+  @keyframes drift{
+    from{transform:translateX(-30px);}
+    to{transform:translateX(30px);}
+  }
+
+  #ground-line{
+    position:absolute;
+    left:0; right:0;
+    height:6px;
+    background:repeating-linear-gradient(90deg, var(--fence) 0 14px, #2f7a4f 14px 16px);
+    box-shadow:0 3px 6px rgba(0,0,0,0.15);
+    z-index:3;
+    transition:transform .12s ease;
+  }
+  #ground-line.flash{
+    background:repeating-linear-gradient(90deg, var(--coral) 0 14px, var(--coral-dark) 14px 16px);
+  }
+  #play-area.shake{animation:shake .25s;}
+  @keyframes shake{
+    0%,100%{transform:translateX(0);}
+    25%{transform:translateX(-6px);}
+    75%{transform:translateX(6px);}
+  }
+
+  .falling{
+    position:absolute;
+    top:0;
+    width:52px; height:52px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    background:#fff;
+    border-radius:50%;
+    border:3px solid var(--purple);
+    box-shadow:0 4px 0 rgba(31,58,95,0.15);
+    z-index:2;
+  }
+  .falling .zh{
+    font-family:'Noto Sans TC',sans-serif;
+    font-weight:900;
+    font-size:22px;
+    color:var(--ink);
+    line-height:1;
+  }
+  .falling .keyhint{
+    font-family:'Baloo 2',sans-serif;
+    font-size:9px;
+    color:#9aa9c0;
+    margin-top:1px;
+    text-transform:uppercase;
+  }
+  .falling.pop{
+    animation:pop .25s forwards;
+  }
+  @keyframes pop{
+    to{transform:scale(1.6); opacity:0;}
+  }
+  .falling.miss{
+    animation:missFall .2s forwards;
+  }
+  @keyframes missFall{
+    to{transform:translateY(10px); opacity:0;}
+  }
+  .float-score{
+    position:absolute;
+    font-family:'Baloo 2',sans-serif;
+    font-weight:700;
+    color:var(--purple);
+    font-size:16px;
+    z-index:6;
+    animation:floatUp .7s forwards;
+    pointer-events:none;
+  }
+  @keyframes floatUp{
+    from{opacity:1; transform:translateY(0);}
+    to{opacity:0; transform:translateY(-30px);}
+  }
+
+  /* ---- virtual keyboard ---- */
+  #keyboard{
+    background:#EAF3FB;
+    padding:8px 6px 14px;
+    z-index:5;
+    position:relative;
+    border-top:2px solid #d5e6f5;
+  }
+  .kb-row{
+    display:flex;
+    justify-content:center;
+    gap:3px;
+    margin-bottom:3px;
+  }
+  .key{
+    flex:1;
+    max-width:38px;
+    aspect-ratio:1/1;
+    background:#fff;
+    border:none;
+    border-radius:8px;
+    box-shadow:0 3px 0 rgba(31,58,95,0.15);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    padding:2px 0;
+    cursor:pointer;
+  }
+  .key .zh{font-family:'Noto Sans TC',sans-serif; font-weight:700; font-size:14px; color:var(--ink);}
+  .key .kl{font-family:'Baloo 2',sans-serif; font-size:8px; color:#9aa9c0; margin-top:1px;}
+  .key:active{transform:translateY(2px); box-shadow:0 1px 0 rgba(31,58,95,0.15);}
+  .key.ghost{
+    background:transparent;
+    box-shadow:none;
+    cursor:default;
+  }
+  .key.ghost .zh{color:#b9c9dd; font-size:11px;}
+  .kb-note{
+    text-align:center;
+    font-size:10px;
+    color:#7f93ab;
+    margin-top:4px;
+  }
+
+  /* ---- pause overlay ---- */
+  #pause-overlay {
+    display: none;
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(31, 58, 95, 0.6);
+    backdrop-filter: blur(5px);
+    z-index: 10;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+  #pause-overlay.active { display: flex; }
+  .pause-card {
+    background: var(--card);
+    border-radius: 28px;
+    padding: 32px 24px;
+    box-shadow: var(--shadow);
+    max-width: 300px;
+    width: 100%;
+    text-align: center;
+  }
+  .pause-title {
+    font-family: 'Baloo 2', sans-serif;
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--purple);
+    margin: 0 0 20px;
+  }
+  .pause-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .pause-actions button {
+    width: 100%;
+  }
+  button.secondary {
+    font-family: 'Noto Sans TC', sans-serif;
+    background: #e2e9f3;
+    color: #4a5d78;
+    border: none;
+    font-size: 16px;
+    font-weight: 700;
+    padding: 12px 0;
+    border-radius: 999px;
+    box-shadow: 0 4px 0 #cbd5e1;
+    cursor: pointer;
+    transition: transform .05s ease;
+  }
+  button.secondary:active { transform: translateY(2px); box-shadow: 0 2px 0 #cbd5e1; }
+
+  /* ---- game over screen ---- */
+  #screen-over{
+    align-items:center;
+    justify-content:center;
+    padding:24px;
+    text-align:center;
+    background:linear-gradient(180deg,var(--sky-top) 0%, var(--sky-bottom) 60%, var(--grass) 60%, #4CBB7E 100%);
+  }
+  .over-card{
+    background:var(--card);
+    border-radius:28px;
+    padding:30px 26px;
+    box-shadow:var(--shadow);
+    max-width:320px;
+    width:100%;
+  }
+  .over-title{
+    font-family:'Baloo 2',sans-serif;
+    font-size:28px;
+    font-weight:800;
+    color:var(--coral-dark);
+    margin:0 0 18px;
+  }
+  .over-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    padding:10px 0;
+    border-bottom:1px dashed #e2e9f2;
+  }
+  .over-row:last-of-type{border-bottom:none;}
+  .over-label{font-size:13px; color:#5b7291;}
+  .over-value{font-family:'Baloo 2',sans-serif; font-size:22px; font-weight:700; color:var(--ink);}
+  .over-value.best{color:var(--sun); text-shadow:0 1px 0 rgba(0,0,0,0.08);}
+  .new-best{
+    display:inline-block;
+    font-size:11px;
+    background:var(--sun);
+    color:#7a4b00;
+    font-weight:700;
+    padding:2px 8px;
+    border-radius:999px;
+    margin-left:6px;
+    vertical-align:middle;
+  }
+  #restart-btn{margin-top:20px;}
+</style>
+</head>
+<body>
+
+<div id="stage">
+
+  <section id="screen-start" class="screen active">
+    <div class="sun"></div>
+    <div class="title-card">
+      <div class="logo-symbols">ㄅ ㄆ ㄇ ㄈ</div>
+      <h1 class="game-title">注音快手</h1>
+      <p class="subtitle">注音符號從天而降，眼明手快按對鍵，接住它們！</p>
+      <div class="rules">
+        <div>🎯 打對鍵消除注音，<b>+5 分</b></div>
+        <div>💔 碰到底線或按錯鍵，<b>−1 生命</b></div>
+        <div>⚡ 每接住 10 個，掉落速度就加快</div>
+        <div>❤️ 初始 5 條生命，用完遊戲結束</div>
+      </div>
+      <div class="high-score-pill" id="start-highscore">🏆 歷史最高 0 分</div>
+      <br>
+      <button class="primary display" id="start-btn">開始遊戲</button>
+      <div style="margin-top:14px;">
+        <button id="test-sound-btn" style="font-family:'Noto Sans TC',sans-serif;font-size:12px;background:#F4F9FF;border:1px solid #dbe8f7;color:#3a5170;padding:6px 14px;border-radius:999px;cursor:pointer;">🔊 測試音效</button>
+        <div id="test-sound-result" style="font-size:11px;color:#5b7291;margin-top:8px;line-height:1.6;"></div>
+      </div>
+      <div style="font-size:9px;color:#9aa9c0;margin-top:14px;line-height:1.5;">
+        發音音檔來源：教育部《國語注音符號手冊》，創用CC 姓名標示 4.0 授權
+      </div>
+    </div>
+  </section>
+
+  <section id="screen-game" class="screen">
+    <div id="hud">
+      <div id="hearts"></div>
+      <div id="hud-right">
+        <div class="stat" id="score-stat">0 分</div>
+        <div class="stat" id="speed-stat">速度 1</div>
+        <button id="sound-toggle" class="hud-btn">🔊</button>
+        <button id="pause-btn" class="hud-btn">⏸️</button>
+      </div>
+    </div>
+
+    <div id="play-area">
+      <div class="cloud cloud-anim" style="width:70px;height:26px;top:14px;left:8%; animation-duration:9s;"></div>
+      <div class="cloud cloud-anim" style="width:50px;height:20px;top:40px;left:60%; animation-duration:11s;"></div>
+      <div id="ground-line"></div>
+      
+      <div id="pause-overlay">
+        <div class="pause-card">
+          <div class="pause-title">遊戲暫停中</div>
+          <div class="pause-actions">
+            <button class="primary display" id="resume-btn">繼續遊戲</button>
+            <button class="secondary" id="quit-btn">返回主畫面</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="keyboard"></div>
+  </section>
+
+  <section id="screen-over" class="screen">
+    <div class="over-card">
+      <div class="over-title display">遊戲結束！</div>
+      <div class="over-row">
+        <span class="over-label">本次積分</span>
+        <span class="over-value display" id="final-score">0 分</span>
+      </div>
+      <div class="over-row">
+        <span class="over-label">歷史最高分 <span id="new-best-badge"></span></span>
+        <span class="over-value best display" id="final-best">0 分</span>
+      </div>
+      <button class="primary display" id="restart-btn">再玩一次</button>
+    </div>
+  </section>
+
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ---------------- Zhuyin keyboard data ---------------- */
+  var ROWS = [
+    [["1","ㄅ"],["2","ㄉ"],["3",null],["4",null],["5","ㄓ"],["6",null],["7",null],["8","ㄚ"],["9","ㄞ"],["0","ㄢ"],["-","ㄦ"]],
+    [["q","ㄆ"],["w","ㄊ"],["e","ㄍ"],["r","ㄐ"],["t","ㄔ"],["y","ㄗ"],["u","ㄧ"],["i","ㄛ"],["o","ㄟ"],["p","ㄣ"]],
+    [["a","ㄇ"],["s","ㄋ"],["d","ㄎ"],["f","ㄑ"],["g","開（ㄕ）"],["h","ㄘ"],["j","ㄨ"],["k","ㄜ"],["l","ㄠ"],[";","ㄤ"]],
+    [["z","ㄈ"],["x","ㄌ"],["c","ㄏ"],["v","ㄒ"],["b","ㄖ"],["n","ㄙ"],["m","ㄩ"],[",","ㄝ"],[".","ㄡ"],["/","ㄥ"]]
+  ];
+
+  // 鍵盤「深度 -> ㄕ」修正
+  ROWS[2][4] = ["g", "ㄕ"];
+
+  var KEY_TO_SYMBOL = {};   
+  var SYMBOL_TO_KEY = {};   
+  var ALL_SYMBOLS = [];
+  ROWS.forEach(function(row){
+    row.forEach(function(pair){
+      var key = pair[0], sym = pair[1];
+      if(sym){
+        KEY_TO_SYMBOL[key] = sym;
+        SYMBOL_TO_KEY[sym] = key;
+        ALL_SYMBOLS.push(sym);
+      }
+    });
+  });
+
+  var READING = {
+    "ㄅ":"ㄅㄛ","ㄆ":"ㄆㄛ","ㄇ":"ㄇㄛ","ㄈ":"ㄈㄛ",
+    "ㄉ":"ㄉㄜ","ㄊ":"ㄊㄜ","ㄋ":"ㄋㄜ","ㄌ":"ㄌㄜ",
+    "ㄍ":"ㄍㄜ","ㄎ":"ㄎㄜ","ㄏ":"ㄏㄜ",
+    "ㄐ":"ㄐㄧ","ㄑ":"ㄑㄧ","ㄒ":"ㄒㄧ",
+    "ㄓ":"ㄓ","ㄔ":"ㄔ","ㄕ":"ㄕ","ㄖ":"ㄖ",
+    "ㄗ":"ㄗ","ㄘ":"ㄘ","ㄙ":"ㄙ",
+    "ㄧ":"ㄧ","ㄨ":"ㄨ","ㄩ":"ㄩ",
+    "ㄚ":"ㄚ","ㄛ":"ㄛ","ㄜ":"ㄜ","ㄝ":"ㄝ",
+    "ㄞ":"ㄞ","ㄟ":"ㄟ","ㄠ":"ㄠ","ㄡ":"ㄡ",
+    "ㄢ":"ㄢ","ㄣ":"ㄣ","ㄤ":"ㄤ","ㄥ":"ㄥ","ㄦ":"ㄦ"
+  };
+
+  /* ---------------- persistent high score ---------------- */
+  var highScore = 0;
+  async function loadHighScore(){
+    try{
+      var res = await window.storage.get('zhuyin-game-high-score');
+      if(res && res.value){ highScore = parseInt(res.value,10) || 0; }
+    }catch(e){ highScore = 0; }
+    document.getElementById('start-highscore').textContent = '🏆 歷史最高 ' + highScore + ' 分';
+  }
+  async function saveHighScore(v){
+    try{ await window.storage.set('zhuyin-game-high-score', String(v)); }catch(e){}
+  }
+
+  /* ---------------- game state ---------------- */
+  var state = {
+    activeScreen: 'start', // 'start', 'game', 'over' 追蹤目前畫面
+    playing:false,
+    paused:false, 
+    lives:5,
+    score:0,
+    successCount:0,
+    spawnInterval:5000,
+    fallDuration:20000,
+    speedLevel:1,
+    soundOn:true
+  };
+  var fallingItems = []; 
+  var spawnTimer = null;
+  var rafId = null;
+  var itemSeq = 0;
+  var lastTickTime = 0; 
+
+  var playArea = document.getElementById('play-area');
+  var groundLine = document.getElementById('ground-line');
+  var heartsEl = document.getElementById('hearts');
+  var scoreStat = document.getElementById('score-stat');
+  var speedStat = document.getElementById('speed-stat');
+  var soundToggle = document.getElementById('sound-toggle');
+  var pauseBtn = document.getElementById('pause-btn');
+  var pauseOverlay = document.getElementById('pause-overlay');
+
+  var GROUND_PERCENT = 84; 
+
+  var AUDIO_BASE = "https://language.moe.gov.tw/001/Upload/files/site_content/M0001/juyin/html_ch/audio/";
+  
+  var CANONICAL_ORDER = [
+    "ㄅ","ㄆ","ㄇ","ㄈ","ㄉ","ㄊ","ㄋ","ㄌ","ㄍ","ㄎ","ㄏ","ㄐ","ㄑ","ㄒ","ㄓ","ㄔ","ㄕ","ㄖ","ㄗ","ㄘ","ㄙ",
+    "ㄚ","ㄛ","ㄜ","ㄝ","ㄞ","ㄟ","ㄠ","ㄡ","ㄢ","ㄣ","ㄤ","ㄥ","ㄦ",
+    "ㄧ","ㄨ","ㄩ"
+  ];
+  
+  var SYMBOL_TO_AUDIO = {};
+  CANONICAL_ORDER.forEach(function(sym, idx){
+    SYMBOL_TO_AUDIO[sym] = AUDIO_BASE + "F" + (idx+1) + ".WAV";
+  });
+  var audioCache = {}; 
+
+  function warmUpAudio(){
+    CANONICAL_ORDER.forEach(function(sym){
+      try{
+        var a = new Audio(SYMBOL_TO_AUDIO[sym]);
+        a.preload = 'auto';
+        audioCache[sym] = a;
+      }catch(e){}
+    });
+  }
+
+  function playPronunciation(symbol){
+    if(!state.soundOn) return;
+    var a = audioCache[symbol];
+    try{
+      if(a){
+        a.currentTime = 0;
+        var p = a.play();
+        if(p && p.catch) p.catch(function(){ speak(symbol); });
+        return;
+      }
+      var url = SYMBOL_TO_AUDIO[symbol];
+      if(url){
+        var fresh = new Audio(url);
+        var p2 = fresh.play();
+        if(p2 && p2.catch) p2.catch(function(){ speak(symbol); });
+        return;
+      }
+    }catch(e){}
+    speak(symbol); 
+  }
+
+  /* ---------------- audio / synthesis effects ---------------- */
+  var audioCtx = null;
+  function getAudioCtx(){
+    if(!audioCtx){
+      try{ audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }catch(e){ audioCtx = null; }
+    }
+    return audioCtx;
+  }
+  function playBeep(freq, duration, type){
+    if(!state.soundOn) return;
+    var ctx = getAudioCtx();
+    if(!ctx) return;
+    try{
+      if(ctx.state === 'suspended'){ ctx.resume(); }
+      var osc = ctx.createOscillator();
+      var gain = ctx.createGain();
+      osc.type = type || 'sine';
+      osc.frequency.value = freq;
+      gain.gain.setValueAtTime(0.15, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start();
+      osc.stop(ctx.currentTime + duration);
+    }catch(e){}
+  }
+  function playWrongBeep(){ playBeep(180, 0.25, 'sawtooth'); }
+
+  var speechVoices = [];
+  function loadVoices(){
+    if(!('speechSynthesis' in window)) return;
+    speechVoices = window.speechSynthesis.getVoices() || [];
+  }
+  if('speechSynthesis' in window){
+    loadVoices();
+    window.speechSynthesis.onvoiceschanged = loadVoices;
+  }
+  function pickVoice(){
+    if(!speechVoices.length) return null;
+    return speechVoices.find(function(v){ return v.lang === 'zh-TW'; })
+        || speechVoices.find(function(v){ return /^zh/i.test(v.lang); })
+        || null;
+  }
+  function speak(symbol){
+    if(!state.soundOn) return;
+    if(!('speechSynthesis' in window)) return;
+    try{
+      var text = READING[symbol] || symbol;
+      var utt = new SpeechSynthesisUtterance(text);
+      utt.lang = 'zh-TW';
+      utt.rate = 0.85;
+      var v = pickVoice();
+      if(v) utt.voice = v;
+      window.speechSynthesis.speak(utt);
+    }catch(e){}
+  }
+
+  function unlockAudio(){
+    var ctx = getAudioCtx();
+    if(ctx && ctx.state === 'suspended') ctx.resume();
+    warmUpAudio();
+  }
+
+  function renderHearts(){
+    heartsEl.innerHTML = '';
+    for(var i=0;i<5;i++){
+      var span = document.createElement('span');
+      span.className = 'heart' + (i < state.lives ? '' : ' lost');
+      span.textContent = i < state.lives ? '❤️' : '🤍';
+      heartsEl.appendChild(span);
+    }
+  }
+
+  function buildKeyboard(){
+    var kb = document.getElementById('keyboard');
+    kb.innerHTML = '';
+    ROWS.forEach(function(row){
+      var rowEl = document.createElement('div');
+      rowEl.className = 'kb-row';
+      row.forEach(function(pair){
+        var key = pair[0], sym = pair[1];
+        var btn = document.createElement('button');
+        btn.className = 'key' + (sym ? '' : ' ghost');
+        if(sym){
+          btn.innerHTML = '<span class="zh">'+sym+'</span><span class="kl">'+key.toUpperCase()+'</span>';
+          btn.addEventListener('pointerdown', function(e){
+            e.preventDefault();
+            handleKeyInput(key);
+          });
+        } else {
+          btn.innerHTML = '<span class="zh">·</span>';
+          btn.disabled = true;
+        }
+        rowEl.appendChild(btn);
+      });
+      kb.appendChild(rowEl);
+    });
+    var note = document.createElement('div');
+    note.className = 'kb-note';
+    note.textContent = '灰色鍵為聲調鍵，本遊戲不使用';
+    kb.appendChild(note);
+  }
+
+  /* ---------------- spawning ---------------- */
+  var spawnTimeLeft = 0; 
+
+  function spawnSymbol(){
+    var sym = ALL_SYMBOLS[Math.floor(Math.random()*ALL_SYMBOLS.length)];
+    var key = SYMBOL_TO_KEY[sym];
+    var el = document.createElement('div');
+    el.className = 'falling';
+    el.innerHTML = '<span class="zh">'+sym+'</span><span class="keyhint">'+key.toUpperCase()+'</span>';
+    var leftPercent = 8 + Math.random()*78; 
+    el.style.left = leftPercent + '%';
+    el.style.top = '0%';
+    playArea.appendChild(el);
+
+    var item = {
+      id: ++itemSeq,
+      char: sym,
+      key: key,
+      el: el,
+      startTime: performance.now()
+    };
+    fallingItems.push(item);
+  }
+
+  function scheduleNextSpawn(customDelay){
+    if(!state.playing || state.paused) return;
+    var delay = (customDelay !== undefined) ? customDelay : state.spawnInterval;
+    spawnTimeLeft = delay;
+
+    spawnTimer = setTimeout(function(){
+      spawnSymbol();
+      scheduleNextSpawn();
+    }, delay);
+  }
+
+  /* ---------------- animation loop ---------------- */
+  function tick(now){
+    if(!state.playing) return;
+    
+    if(state.paused) {
+      lastTickTime = now;
+      rafId = requestAnimationFrame(tick);
+      return;
+    }
+
+    var deltaTime = now - lastTickTime;
+    lastTickTime = now;
+    
+    if (spawnTimeLeft > 0) {
+      spawnTimeLeft -= deltaTime;
+    }
+
+    for(var i=fallingItems.length-1;i>=0;i--){
+      var item = fallingItems[i];
+      
+      if (item.pausedTimeDelta) {
+        item.startTime += item.pausedTimeDelta;
+        delete item.pausedTimeDelta;
+      }
+      
+      var elapsed = now - item.startTime;
+      var progress = elapsed / state.fallDuration;
+      if(progress >= 1){
+        missItem(i);
+        continue;
+      }
+      var topPercent = progress * GROUND_PERCENT;
+      item.el.style.top = topPercent + '%';
+    }
+    rafId = requestAnimationFrame(tick);
+  }
+
+  function removeItemAt(index, animClass){
+    var item = fallingItems[index];
+    if(!item) return;
+    item.el.classList.add(animClass);
+    (function(el){
+      setTimeout(function(){ if(el.parentNode) el.parentNode.removeChild(el); }, 260);
+    })(item.el);
+    fallingItems.splice(index,1);
+  }
+
+  function missItem(index){
+    removeItemAt(index,'miss');
+    playWrongBeep();
+    loseLife();
+  }
+
+  function flashGround(){
+    groundLine.classList.add('flash');
+    playArea.classList.add('shake');
+    setTimeout(function(){
+      groundLine.classList.remove('flash');
+      playArea.classList.remove('shake');
+    }, 220);
+  }
+
+  function loseLife(){
+    state.lives--;
+    renderHearts();
+    flashGround();
+    if(state.lives <= 0){
+      endGame();
+    }
+  }
+
+  function showFloatingScore(x, y, text, color){
+    var f = document.createElement('div');
+    f.className = 'float-score';
+    f.textContent = text;
+    f.style.left = x + 'px';
+    f.style.top = y + 'px';
+    f.style.color = color || '';
+    playArea.appendChild(f);
+    setTimeout(function(){ if(f.parentNode) f.parentNode.removeChild(f); }, 720);
+  }
+
+  /* ---------------- input handling ---------------- */
+  function handleKeyInput(rawKey){
+    if(!state.playing || state.paused) return; 
+    var key = rawKey.toLowerCase();
+    var symbol = KEY_TO_SYMBOL[key];
+    if(!symbol) return; 
+
+    var matchIndex = -1;
+    var earliestStart = Infinity;
+    for(var i=0; i<fallingItems.length; i++){
+      if(fallingItems[i].char === symbol && fallingItems[i].startTime < earliestStart){
+        earliestStart = fallingItems[i].startTime;
+        matchIndex = i;
+      }
+    }
+
+    if(matchIndex === -1){
+      playWrongBeep();
+      loseLife();
+      return;
+    }
+
+    var item = fallingItems[matchIndex];
+    var rect = item.el.getBoundingClientRect();
+    var areaRect = playArea.getBoundingClientRect();
+    showFloatingScore(rect.left - areaRect.left, rect.top - areaRect.top, '+5', '#8C7AE6');
+    playPronunciation(symbol);
+    removeItemAt(matchIndex, 'pop');
+
+    state.score += 5;
+    state.successCount += 1;
+    scoreStat.textContent = state.score + ' 分';
+
+    if(state.successCount % 10 === 0 && state.spawnInterval > 1000){
+      state.spawnInterval = Math.max(1000, state.spawnInterval - 1000);
+      state.speedLevel += 1;
+      speedStat.textContent = '速度 ' + state.speedLevel;
+    }
+  }
+
+  // 【核心鍵盤優化】監聽實體電腦鍵盤，加入嚴格場景判斷
+  document.addEventListener('keydown', function(e){
+    if(e.repeat) return;
+    
+    // 1) 遊戲進行中（且非暫停）：打字消除注音
+    if(state.activeScreen === 'game' && !state.paused) {
+      if(e.key === 'Escape') {
+        pauseGame();
+        return;
+      }
+      handleKeyInput(e.key);
+    }
+    // 2) 暫停視窗彈出時：支援快捷鍵操作
+    else if(state.activeScreen === 'game' && state.paused) {
+      if(e.key === ' ' || e.key === 'Escape' || e.key === 'Enter') {
+        e.preventDefault();
+        resumeGame();
+      } else if(e.key === 'Backspace') {
+        quitToMenu();
+      }
+    }
+    // 3) 主畫面或結束畫面：按 Enter 直接開始
+    else if(state.activeScreen === 'start' || state.activeScreen === 'over') {
+      if(e.key === 'Enter') {
+        unlockAudio();
+        startGame();
+      }
+    }
+  });
+
+  /* ---------------- pause mechanisms ---------------- */
+  var pauseStartTimestamp = 0;
+
+  function pauseGame() {
+    if (!state.playing || state.paused) return;
+    state.paused = true;
+    pauseStartTimestamp = performance.now();
+    clearTimeout(spawnTimer); 
+    pauseOverlay.classList.add('active');
+  }
+
+  function resumeGame() {
+    if (!state.playing || !state.paused) return;
+    state.paused = false;
+    var pauseDuration = performance.now() - pauseStartTimestamp;
+    
+    fallingItems.forEach(function(item) {
+      item.pausedTimeDelta = pauseDuration;
+    });
+
+    pauseOverlay.classList.remove('active');
+    
+    var nextDelay = Math.max(50, spawnTimeLeft);
+    scheduleNextSpawn(nextDelay);
+  }
+
+  function quitToMenu() {
+    state.playing = false;
+    clearTimeout(spawnTimer);
+    cancelAnimationFrame(rafId);
+    pauseOverlay.classList.remove('active');
+    loadHighScore();
+    showScreen('screen-start');
+  }
+
+  /* ---------------- screens ---------------- */
+  function showScreen(id){
+    document.querySelectorAll('.screen').forEach(function(s){ s.classList.remove('active'); });
+    document.getElementById(id).classList.add('active');
+    
+    if(id === 'screen-start') state.activeScreen = 'start';
+    if(id === 'screen-game') state.activeScreen = 'game';
+    if(id === 'screen-over') state.activeScreen = 'over';
+  }
+
+  function resetState(){
+    state.playing = true;
+    state.paused = false;
+    state.lives = 5;
+    state.score = 0;
+    state.successCount = 0;
+    state.spawnInterval = 5000;
+    state.speedLevel = 1;
+    pauseOverlay.classList.remove('active');
+    fallingItems.forEach(function(item){ if(item.el.parentNode) item.el.parentNode.removeChild(item.el); });
+    fallingItems = [];
+    renderHearts();
+    scoreStat.textContent = '0 分';
+    speedStat.textContent = '速度 1';
+  }
+
+  function startGame(){
+    resetState();
+    showScreen('screen-game');
+    lastTickTime = performance.now();
+    scheduleNextSpawn();
+    rafId = requestAnimationFrame(tick);
+  }
+
+  async function endGame(){
+    state.playing = false;
+    clearTimeout(spawnTimer);
+    cancelAnimationFrame(rafId);
+
+    var isNewBest = state.score > highScore;
+    if(isNewBest){
+      highScore = state.score;
+      await saveHighScore(highScore);
+    }
+    document.getElementById('final-score').textContent = state.score + ' 分';
+    document.getElementById('final-best').textContent = highScore + ' 分';
+    document.getElementById('new-best-badge').innerHTML = isNewBest ? '<span class="new-best">新紀錄！</span>' : '';
+    showScreen('screen-over');
+  }
+
+  /* ---------------- event listeners ---------------- */
+  soundToggle.addEventListener('click', function(){
+    state.soundOn = !state.soundOn;
+    soundToggle.textContent = state.soundOn ? '🔊' : '🔇';
+  });
+
+  pauseBtn.addEventListener('click', function() {
+    pauseGame();
+  });
+
+  document.getElementById('resume-btn').addEventListener('click', function() {
+    resumeGame();
+  });
+
+  document.getElementById('quit-btn').addEventListener('click', function() {
+    quitToMenu();
+  });
+
+  document.getElementById('test-sound-btn').addEventListener('click', function(){
+    unlockAudio();
+    var out = document.getElementById('test-sound-result');
+    out.innerHTML = '測試中…';
+    var lines = [];
+
+    try{
+      var ctx = getAudioCtx();
+      if(ctx){
+        playBeep(660, 0.3, 'triangle');
+        lines.push('✅ 嗶聲已送出（AudioContext 狀態：' + ctx.state + '）');
+      } else {
+        lines.push('❌ 這個瀏覽器環境不支援 Web Audio');
+      }
+    }catch(e){ lines.push('❌ 嗶聲播放失敗：' + e.message); }
+
+    try{
+      var testAudio = new Audio(SYMBOL_TO_AUDIO['ㄅ']);
+      var p = testAudio.play();
+      if(p && p.then){
+        p.then(function(){ lines.push('✅ 官方注音錄音檔播放成功'); render(); })
+         .catch(function(err){ lines.push('❌ 官方錄音檔無法播放：' + err.message); render(); });
+      } else {
+        lines.push('⚠️ 錄音檔已呼叫播放（此瀏覽器無法回報結果）');
+      }
+    }catch(e){ lines.push('❌ 錄音檔播放例外：' + e.message); }
+
+    if('speechSynthesis' in window){
+      lines.push('ℹ️ 語音合成 API 存在（實際發聲需另外確認）');
+    } else {
+      lines.push('❌ 此瀏覽器環境沒有語音合成 API');
+    }
+
+    function render(){ out.innerHTML = lines.join('<br>'); }
+    render();
+  });
+
+  document.getElementById('start-btn').addEventListener('click', function(){
+    unlockAudio();
+    startGame();
+  });
+  document.getElementById('restart-btn').addEventListener('click', function(){
+    unlockAudio();
+    startGame();
+  });
+
+  buildKeyboard();
+  loadHighScore();
+})();
+</script>
+</body>
+</html>
