@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
-<title>Zhuyin Master - Fixed Pro</title>
+<title>Zhuyin Master - Pure Zhuyin Version</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght=500;700;800&family=Noto+Sans+TC:wght=500;700;900&display=swap" rel="stylesheet">
 <style>
@@ -315,13 +315,12 @@
     z-index:3;
   }
 
-  /* Mode 1 Element */
+  /* Mode 1 Element - 純注音符號 */
   .falling{
     position:absolute;
     top:0;
     width:44px; height:44px;
     display:flex;
-    flex-direction:column;
     align-items:center;
     justify-content:center;
     background:#fff;
@@ -332,15 +331,9 @@
   }
   .falling .zh{
     font-weight:900;
-    font-size:18px;
+    font-size:22px;
     color:var(--ink);
     line-height:1;
-  }
-  .falling .keyhint{
-    font-size:8px;
-    color:#9aa9c0;
-    margin-top:1px;
-    text-transform:uppercase;
   }
 
   /* 🎧 Mode 2: Listening UI */
@@ -384,7 +377,7 @@
     max-width: 90%;
   }
 
-  /* 📏 Mode 2 改進版時間進度條：固定放置在遊戲畫面正上方，再也不會跑版消失 */
+  /* Mode 2 計時器 */
   #timer-bar-container {
     display: none;
     width: 80%;
@@ -416,7 +409,7 @@
     to{opacity:0; transform:translateY(-25px);}
   }
 
-  /* ⌨️ 注音鍵盤 */
+  /* ⌨️ 注音鍵盤（純注音無英文提示） */
   #keyboard{
     background:#EAF3FB;
     padding:4px 4px env(safe-area-inset-bottom, 8px); 
@@ -440,13 +433,11 @@
     border-radius:5px;
     box-shadow:0 2px 0 rgba(31,58,95,0.12);
     display:flex;
-    flex-direction:column;
     align-items:center;
     justify-content:center;
-    padding:1px 0;
+    padding:0;
   }
-  .key .zh{font-weight:700; font-size:13px; color:var(--ink); line-height: 1.1;}
-  .key .kl{font-size:8px; color:#9aa9c0; transform: scale(0.9); margin-top:-1px;}
+  .key .zh{font-weight:700; font-size:16px; color:var(--ink); line-height: 1;}
   .key:active{transform:translateY(1px); box-shadow:0 1px 0 rgba(31,58,95,0.12); background:#f0f4f8;}
   .key.ghost { background:transparent; box-shadow:none; }
   .key.ghost .zh{color:#b9c9dd; font-size:10px;}
@@ -716,11 +707,11 @@
     successCount:0,
     speedLevel:1,
     soundOn:true,
-    spawnInterval:5000,
-    fallDuration:20000,
+    spawnInterval:2500,
+    fallDuration:10000,
     currentQuestion: null, 
-    mode2TimeLimit: 10000, 
-    mode2TimeLeft: 10000,
+    mode2TimeLimit: 20000, 
+    mode2TimeLeft: 20000,
     mode2IsWaitingForNext: false 
   };
   
@@ -873,6 +864,7 @@
     }
   }
 
+  /* 🛠️ 鍵盤建構：完全移除英文字母顯示，僅保留注音 */
   function buildKeyboard(){
     var kb = document.getElementById('keyboard');
     kb.innerHTML = '';
@@ -884,7 +876,7 @@
         var btn = document.createElement('button');
         btn.className = 'key' + (sym ? '' : ' ghost');
         if(sym){
-          btn.innerHTML = '<span class="zh">'+sym+'</span><span class="kl">'+key.toUpperCase()+'</span>';
+          btn.innerHTML = '<span class="zh">'+sym+'</span>';
           btn.addEventListener('pointerdown', function(e){
             e.preventDefault();
             handleKeyInput(key);
@@ -927,14 +919,15 @@
     return pool.length > 0;
   }
 
+  /* ⚡ 速度設置：遊戲一加速 2 倍（掉落與生成減半），遊戲二放慢 2 倍（時間擴增為2倍） */
   function calculateTimingsBySpeed(level) {
-    var spawnInterval = 4800 - (level - 1) * 420;
-    var fallDuration = 19000 - (level - 1) * 1700;
-    var m2Limit = 9500 - (level - 1) * 900; 
+    var spawnInterval = (4800 - (level - 1) * 420) / 2;
+    var fallDuration = (19000 - (level - 1) * 1700) / 2;
+    var m2Limit = (9500 - (level - 1) * 900) * 2; 
     return {
-      spawnInterval: Math.max(900, spawnInterval),
-      fallDuration: Math.max(4000, fallDuration),
-      m2Limit: Math.max(2200, m2Limit)
+      spawnInterval: Math.max(450, spawnInterval),
+      fallDuration: Math.max(2000, fallDuration),
+      m2Limit: Math.max(4400, m2Limit)
     };
   }
 
@@ -956,13 +949,14 @@
 
   var spawnTimeLeft = 0; 
 
+  /* 🛠️ 下落注音泡泡：完全移除英文提示 */
   function spawnSymbol(){
     if(activePool.length === 0) return;
     var sym = activePool[Math.floor(Math.random()*activePool.length)];
     var key = SYMBOL_TO_KEY[sym];
     var el = document.createElement('div');
     el.className = 'falling';
-    el.innerHTML = '<span class="zh">'+sym+'</span><span class="keyhint">'+key.toUpperCase()+'</span>';
+    el.innerHTML = '<span class="zh">'+sym+'</span>';
     var leftPercent = 6 + Math.random()*82; 
     el.style.left = leftPercent + '%';
     el.style.top = '0%';
@@ -1231,7 +1225,6 @@
     if(id === 'screen-over') state.activeScreen = 'over';
   }
 
-  /* 🛠️ 重新理清介面隱藏與呈現邏輯，確保進度條容器在聽力模式正常展開 */
   function setupGameLayout() {
     if(state.gameMode === 1) {
       groundLine.style.display = 'block';
