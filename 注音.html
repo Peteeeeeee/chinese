@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
-<title>Zhuyin Master - Pure Zhuyin Version</title>
+<title>Zhuyin Master</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght=500;700;800&family=Noto+Sans+TC:wght=500;700;900&display=swap" rel="stylesheet">
 <style>
@@ -152,7 +152,7 @@
     color:var(--ink);
     margin-bottom:4px;
     display:flex;
-    justify-content:space-between;
+    justify-space-between;
     align-items:center;
   }
   .custom-ctrl-btn{
@@ -315,7 +315,7 @@
     z-index:3;
   }
 
-  /* Mode 1 Element - 純注音符號 */
+  /* Mode 1 Element - 泡泡內只保留大顆注音 */
   .falling{
     position:absolute;
     top:0;
@@ -409,7 +409,7 @@
     to{opacity:0; transform:translateY(-25px);}
   }
 
-  /* ⌨️ 注音鍵盤（純注音無英文提示） */
+  /* ⌨️ 注音實體鍵盤風格 (保留按鍵右上/右下的英文提示) */
   #keyboard{
     background:#EAF3FB;
     padding:4px 4px env(safe-area-inset-bottom, 8px); 
@@ -434,13 +434,15 @@
     box-shadow:0 2px 0 rgba(31,58,95,0.12);
     display:flex;
     align-items:center;
-    justify-content:center;
-    padding:0;
+    justify-content:space-between;
+    padding:2px 4px;
+    position:relative;
   }
-  .key .zh{font-weight:700; font-size:16px; color:var(--ink); line-height: 1;}
+  .key .zh{font-weight:700; font-size:15px; color:var(--ink); line-height: 1;}
+  .key .en{font-size:9px; color:#8FA1B7; text-transform:uppercase; font-weight:600; line-height: 1; align-self: flex-end;}
   .key:active{transform:translateY(1px); box-shadow:0 1px 0 rgba(31,58,95,0.12); background:#f0f4f8;}
   .key.ghost { background:transparent; box-shadow:none; }
-  .key.ghost .zh{color:#b9c9dd; font-size:10px;}
+  .key.ghost .en{color:#b9c9dd; font-size:10px;}
 
   /* ---- Pause Overlay ---- */
   #pause-overlay {
@@ -864,7 +866,7 @@
     }
   }
 
-  /* 🛠️ 鍵盤建構：完全移除英文字母顯示，僅保留注音 */
+  /* ⌨️ 鍵盤：保留鍵盤角落的英文提示 */
   function buildKeyboard(){
     var kb = document.getElementById('keyboard');
     kb.innerHTML = '';
@@ -876,13 +878,13 @@
         var btn = document.createElement('button');
         btn.className = 'key' + (sym ? '' : ' ghost');
         if(sym){
-          btn.innerHTML = '<span class="zh">'+sym+'</span>';
+          btn.innerHTML = '<span class="zh">'+sym+'</span><span class="en">'+key+'</span>';
           btn.addEventListener('pointerdown', function(e){
             e.preventDefault();
             handleKeyInput(key);
           });
         } else {
-          btn.innerHTML = '<span class="zh">·</span>';
+          btn.innerHTML = '<span class="zh">·</span><span class="en">'+key+'</span>';
           btn.disabled = true;
         }
         rowEl.appendChild(btn);
@@ -919,7 +921,7 @@
     return pool.length > 0;
   }
 
-  /* ⚡ 速度設置：遊戲一加速 2 倍（掉落與生成減半），遊戲二放慢 2 倍（時間擴增為2倍） */
+  /* ⚡ 速度計算：第一個遊戲加速 2 倍，第二個遊戲時間放慢 2 倍 */
   function calculateTimingsBySpeed(level) {
     var spawnInterval = (4800 - (level - 1) * 420) / 2;
     var fallDuration = (19000 - (level - 1) * 1700) / 2;
@@ -944,12 +946,12 @@
     }
     
     hudSpeedRange.value = level;
-    hudSpeedLabel.textContent = '⚡ Speed: Spd ' + level;
+    hudSpeedLabel.textContent = '⚡ Live Speed: Spd ' + level;
   }
 
   var spawnTimeLeft = 0; 
 
-  /* 🛠️ 下落注音泡泡：完全移除英文提示 */
+  /* 🛠️ 掉落泡泡：徹底移除裡面的英文提示，只留注音符號 */
   function spawnSymbol(){
     if(activePool.length === 0) return;
     var sym = activePool[Math.floor(Math.random()*activePool.length)];
