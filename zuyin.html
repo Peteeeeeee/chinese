@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>注音與詞義多功能學習系統</title>
+  <title>Bopomofo & Vocabulary Practice System</title>
   <style>
     :root {
       --primary: #4f46e5;
@@ -17,7 +17,6 @@
       --font-scale: 1;
     }
 
-    /* 📱 裝置模式套用類別 */
     body.device-mobile {
       --max-width: 480px;
       --font-scale: 1.1;
@@ -43,7 +42,6 @@
       font-size: calc(16px * var(--font-scale));
     }
 
-    /* 🖥️ 裝置選擇迎賓彈窗 (Welcome Screen) */
     .device-modal-overlay {
       position: fixed; top: 0; left: 0; right: 0; bottom: 0;
       background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(5px);
@@ -72,7 +70,6 @@
     .device-icon { font-size: 36px; }
     .device-title { font-weight: bold; font-size: 15px; color: #1e293b; }
 
-    /* 頂部列與裝置切換器 */
     .top-bar {
       width: 100%; max-width: var(--max-width);
       display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;
@@ -91,7 +88,6 @@
       transition: max-width 0.3s ease;
     }
 
-    /* 👤 學生選擇列 */
     .user-select-bar {
       display: flex; align-items: center; gap: 10px; background: #fef3c7;
       border: 1px solid #fde68a; padding: 10px 14px; border-radius: 10px; margin-bottom: 15px;
@@ -105,7 +101,6 @@
       border-radius: 6px; font-size: 13px; font-weight: bold; cursor: pointer;
     }
 
-    /* 📅 週日曆區域 */
     .week-calendar-container {
       background: #e0f2fe; padding: 12px; border-radius: 12px; border: 2px solid #38bdf8; margin-bottom: 15px;
     }
@@ -126,10 +121,9 @@
     .status-badge-complete { background: #dcfce7; color: #15803d; }
     .status-badge-part { background: #fef9c3; color: #a16207; }
 
-    /* 🎮 三大模式切換列 */
     .mode-switch-bar { display: flex; gap: 6px; margin-bottom: 15px; }
     .mode-btn {
-      flex: 1; padding: 12px 4px; font-size: 14px; font-weight: bold; border: 2px solid #cbd5e1;
+      flex: 1; padding: 12px 4px; font-size: 13px; font-weight: bold; border: 2px solid #cbd5e1;
       background: #f1f5f9; color: #64748b; border-radius: 10px; cursor: pointer;
       transition: all 0.2s; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center;
     }
@@ -142,7 +136,6 @@
     .view-section { display: none; }
     .view-section.active { display: block; }
 
-    /* 🎴 模式 0：單字卡 翻牌樣式 */
     .flashcard-wrapper { perspective: 1000px; width: 100%; height: 230px; margin: 15px 0; cursor: pointer; }
     .flashcard-inner {
       position: relative; width: 100%; height: 100%; text-align: center; transition: transform 0.6s;
@@ -161,7 +154,6 @@
     .card-nav-btns { display: flex; justify-content: space-between; gap: 10px; width: 100%; margin-top: 10px; }
     .nav-btn { flex: 1; padding: 12px; background: #e2e8f0; border: none; border-radius: 8px; font-size: 15px; font-weight: bold; cursor: pointer; }
 
-    /* 🧩 模式 2：對對碰卡片樣式 */
     .match-game-container { display: flex; gap: 12px; margin-top: 15px; }
     .match-column { flex: 1; display: flex; flex-direction: column; gap: 10px; }
     .match-card {
@@ -173,7 +165,6 @@
     .match-card.selected { border-color: var(--primary); background: #e0e7ff; color: var(--primary); }
     .match-card.matched { opacity: 0; transform: scale(0.5); pointer-events: none; }
 
-    /* ⌨️ 鍵盤樣式 */
     .target-card { background: #fffbebf5; border: 2px solid #fde68a; border-radius: 12px; padding: 16px; text-align: center; margin-bottom: 15px; }
     .target-word { font-size: 48px; font-weight: bold; color: #1e1b4b; margin: 8px 0; letter-spacing: 4px; }
     .sound-btn { background-color: var(--accent); color: white; font-size: 14px; font-weight: bold; padding: 8px 16px; border: none; border-radius: 8px; cursor: pointer; }
@@ -201,13 +192,11 @@
     .task-chip { padding: 8px 14px; background: #e2e8f0; border-radius: 20px; font-size: 14px; font-weight: bold; cursor: pointer; white-space: nowrap; display: flex; align-items: center; gap: 4px; }
     .task-chip.active { background: var(--user-theme); color: white; }
 
-    /* Modal 視窗 */
     .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 23, 42, 0.75); display: flex; align-items: center; justify-content: center; z-index: 1000; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
     .modal-overlay.active { opacity: 1; pointer-events: auto; }
     .modal-card { background: white; padding: 25px 20px; border-radius: 20px; text-align: center; max-width: 420px; width: 90%; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
     .modal-btn { background-color: var(--primary); color: white; border: none; padding: 10px 20px; border-radius: 8px; font-size: 15px; font-weight: bold; cursor: pointer; width: 100%; }
 
-    /* 👑 管理員相關 */
     .admin-toggle-btn { background: #e2e8f0; color: #475569; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: bold; }
     .admin-toggle-btn:hover { background: #cbd5e1; }
     .admin-tab-group { display: flex; gap: 8px; margin-bottom: 12px; }
@@ -234,22 +223,22 @@
 
   <div class="device-modal-overlay" id="deviceModal">
     <div class="device-card">
-      <div style="font-size: 40px; margin-bottom: 8px;">👋 歡迎使用！</div>
-      <div style="font-size: 18px; font-weight: bold; color: #1e293b;">請選擇您目前的使用的裝置：</div>
-      <div style="font-size: 13px; color: #64748b; margin-top: 4px;">系統將自動切換最舒適的字體與畫面配置</div>
+      <div style="font-size: 40px; margin-bottom: 8px;">👋 Welcome!</div>
+      <div style="font-size: 18px; font-weight: bold; color: #1e293b;">Select your device:</div>
+      <div style="font-size: 13px; color: #64748b; margin-top: 4px;">Optimizes screen layout automatically</div>
       
       <div class="device-options">
         <div class="device-btn" onclick="selectDeviceMode('mobile')">
           <div class="device-icon">📱</div>
-          <div class="device-title">智慧手機</div>
+          <div class="device-title">Phone</div>
         </div>
         <div class="device-btn" onclick="selectDeviceMode('tablet')">
-          <div class="device-icon">平板電腦</div>
-          <div class="device-title">iPad / 平板</div>
+          <div class="device-icon">📱</div>
+          <div class="device-title">Tablet / iPad</div>
         </div>
         <div class="device-btn" onclick="selectDeviceMode('desktop')">
           <div class="device-icon">💻</div>
-          <div class="device-title">桌上型電腦</div>
+          <div class="device-title">Desktop</div>
         </div>
       </div>
     </div>
@@ -257,77 +246,77 @@
 
   <div class="top-bar">
     <div style="display:flex; align-items:center; gap:8px;">
-      <div class="app-title" id="appTitle">🎮 學生注音與意思練習</div>
-      <button class="device-switch-tag" onclick="showDeviceSelectModal()" title="重新切換裝置模式">
-        <span id="currentDeviceIcon">📱</span> <span id="currentDeviceLabel">手機</span> ⚙️
+      <div class="app-title" id="appTitle">🎮 Learning Center</div>
+      <button class="device-switch-tag" onclick="showDeviceSelectModal()" title="Switch Device Mode">
+        <span id="currentDeviceIcon">📱</span> <span id="currentDeviceLabel">Phone</span> ⚙️
       </button>
     </div>
-    <button class="admin-toggle-btn" id="toggleAdminBtn" onclick="handleAdminAccess()">👑 老師後台</button>
+    <button class="admin-toggle-btn" id="toggleAdminBtn" onclick="handleAdminAccess()">👑 後台</button>
   </div>
 
   <div class="container">
     <div class="user-select-bar" id="userSelectBar">
-      <label style="font-weight:bold; color:#78350f;">👦 當前學生：</label>
+      <label style="font-weight:bold; color:#78350f;">👦 Student:</label>
       <select class="user-dropdown" id="studentSelect" onchange="changeCurrentStudent()"></select>
-      <button class="btn-add-user" onclick="addNewStudent()">➕ 新增學生</button>
+      <button class="btn-add-user" onclick="addNewStudent()">➕ Add Student</button>
     </div>
 
     <section id="studentView" class="view-section active">
       <div class="week-calendar-container">
         <div class="week-nav-bar">
-          <button class="week-nav-btn" onclick="changeWeek(-1)">⬅️ 上一週</button>
-          <div style="font-weight:bold; color:#0369a1; font-size:15px;" id="weekTitle">2026年7月</div>
+          <button class="week-nav-btn" onclick="changeWeek(-1)">⬅️ Prev</button>
+          <div style="font-weight:bold; color:#0369a1; font-size:15px;" id="weekTitle">2026/07</div>
           <input type="date" id="studentDatePicker" style="padding:2px 6px; font-size:12px;" onchange="syncDateFromPicker()">
-          <button class="week-nav-btn" onclick="changeWeek(1)">下一週 ➡️</button>
+          <button class="week-nav-btn" onclick="changeWeek(1)">Next ➡️</button>
         </div>
         <div class="week-days-grid" id="weekDaysGrid"></div>
       </div>
 
       <div class="mode-switch-bar">
         <div class="mode-btn active" id="btnMode0" onclick="switchPracticeMode(0)">
-          <span>🎴 單字卡學習</span>
+          <span>🎴 Flashcards</span>
         </div>
         <div class="mode-btn" id="btnMode1" onclick="switchPracticeMode(1)">
-          <span>✍️ 第一部分：注音拼音</span>
-          <span class="badge-done" id="badgePart1" style="display:none;">✅ 已通關</span>
+          <span>✍️ Part 1: Zhuyin</span>
+          <span class="badge-done" id="badgePart1" style="display:none;">✅ Done</span>
         </div>
         <div class="mode-btn" id="btnMode2" onclick="switchPracticeMode(2)">
-          <span>🧩 第二部分：詞義消消樂</span>
-          <span class="badge-done" id="badgePart2" style="display:none;">✅ 已通關</span>
+          <span>🧩 Part 2: Matching</span>
+          <span class="badge-done" id="badgePart2" style="display:none;">✅ Done</span>
         </div>
       </div>
 
       <div id="practiceMode0">
-        <div style="font-size:13px; color:#64748b; text-align:center;">💡 點擊卡片可翻面看意思；按聲音按鈕可朗讀！</div>
+        <div style="font-size:13px; color:#64748b; text-align:center;">💡 Tap card to flip; click speaker button to listen!</div>
         <div class="flashcard-wrapper" id="flashcard" onclick="toggleCardFlip()">
           <div class="flashcard-inner">
             <div class="flashcard-front">
-              <div class="fc-word" id="fcWord">國字</div>
-              <div class="fc-zhuyin" id="fcZhuyin">ㄍㄨㄛˊ ㄗˋ</div>
-              <button class="sound-btn" onclick="event.stopPropagation(); playCurrentCardTTS('front')" style="margin-top:15px;">🔊 朗讀國字</button>
+              <div class="fc-word" id="fcWord">Word</div>
+              <div class="fc-zhuyin" id="fcZhuyin">ㄅㄆㄇ</div>
+              <button class="sound-btn" onclick="event.stopPropagation(); playCurrentCardTTS('front')" style="margin-top:15px;">🔊 Listen Word</button>
             </div>
             <div class="flashcard-back">
-              <div style="font-size:13px; color:#166534; margin-bottom:6px;">📖 詞語意思：</div>
-              <div class="fc-meaning" id="fcMeaning">詞語意思解釋...</div>
-              <button class="sound-btn" onclick="event.stopPropagation(); playCurrentCardTTS('back')" style="margin-top:15px; background:#16a34a;">🔊 朗讀詞語與意思</button>
+              <div style="font-size:13px; color:#166534; margin-bottom:6px;">📖 Definition:</div>
+              <div class="fc-meaning" id="fcMeaning">Meaning explanation...</div>
+              <button class="sound-btn" onclick="event.stopPropagation(); playCurrentCardTTS('back')" style="margin-top:15px; background:#16a34a;">🔊 Listen All</button>
             </div>
           </div>
         </div>
         <div class="card-nav-btns">
-          <button class="nav-btn" onclick="prevFlashcard()">⬅️ 上一張</button>
+          <button class="nav-btn" onclick="prevFlashcard()">⬅️ Prev</button>
           <span id="cardProgress" style="align-self:center; font-weight:bold; color:#475569;">1 / 1</span>
-          <button class="nav-btn" onclick="nextFlashcard()">下一張 ➡️</button>
+          <button class="nav-btn" onclick="nextFlashcard()">Next ➡️</button>
         </div>
       </div>
 
       <div id="practiceMode1" style="display:none;">
-        <h2 style="font-size:16px; margin-top:0;">📋 選擇挑戰詞語：</h2>
+        <h2 style="font-size:15px; margin-top:0; color:#475569;">📋 Select a word:</h2>
         <div class="task-selector" id="taskSelector"></div>
 
         <div class="target-card">
-          <div id="targetPrompt">請拼出這個詞的注音：</div>
-          <div class="target-word" id="displayWord">請選擇任務</div>
-          <button class="sound-btn" onclick="playWordTTS()">🔊 朗讀中文詞</button>
+          <div id="targetPrompt">Enter the Zhuyin for:</div>
+          <div class="target-word" id="displayWord">Select Task</div>
+          <button class="sound-btn" onclick="playWordTTS()">🔊 Read Word</button>
           <div class="meaning-box" id="meaningDisplay"></div>
         </div>
 
@@ -337,7 +326,7 @@
       </div>
 
       <div id="practiceMode2" style="display:none;">
-        <h2 style="text-align:center; font-size:16px;">🧩 配對詞語與意思：點擊正確答案消掉它！</h2>
+        <h2 style="text-align:center; font-size:15px; color:#475569;">🧩 Match each word with its meaning!</h2>
         <div class="message" id="matchResultMessage"></div>
         <div class="match-game-container">
           <div class="match-column" id="wordsColumn"></div>
@@ -347,7 +336,7 @@
     </section>
 
     <section id="adminView" class="view-section">
-      <h2 style="font-size:18px;">👑 老師控制台：日期任務與學生數據統計</h2>
+      <h2 style="font-size:18px;">👑 後台管理：日期任務與學生數據統計</h2>
       
       <div style="margin-bottom:15px;">
         <label style="font-weight:bold; font-size:15px; color:#0369a1;">發佈/檢視日期：</label>
@@ -363,18 +352,18 @@
         <div id="tabSingle" class="tab-content active">
           <div style="display:flex; flex-direction:column; gap:8px;">
             <div style="display:flex; gap:8px;">
-              <input type="text" id="newTaskInput" placeholder="中文（例如：蘋果）" oninput="autoFillZhuyin()" style="flex:1;">
+              <input type="text" id="newTaskInput" placeholder="中文/英文（例如：蘋果 / Apple）" oninput="autoFillZhuyin()" style="flex:1;">
               <input type="text" id="newTaskZhuyin" placeholder="注音（例如：ㄆㄧㄥˊㄍㄨㄛˇ）" style="flex:1;">
             </div>
             <div style="display:flex; gap:8px;">
-              <input type="text" id="newTaskMeaning" placeholder="詞語意思（例如：甜甜的水果）" style="flex:2;">
+              <input type="text" id="newTaskMeaning" placeholder="詞語意思/英文解釋（例如：甜甜的水果）" style="flex:2;">
               <button class="btn-primary" onclick="addTask()">新增任務</button>
             </div>
           </div>
         </div>
 
         <div id="tabBatch" class="tab-content">
-          <textarea id="batchInput" style="width:100%; height:80px; box-sizing:border-box; margin-bottom:8px;" placeholder="蘋果  ㄆㄧㄥˊㄍㄨㄛˇ  甜甜的水果"></textarea>
+          <textarea id="batchInput" style="width:100%; height:80px; box-sizing:border-box; margin-bottom:8px;" placeholder="蘋果	ㄆㄧㄥˊㄍㄨㄛˇ	甜甜的水果"></textarea>
           <button class="btn-primary" onclick="addBatchTasks()" style="width:100%; background:#059669;">🚀 批次匯入</button>
         </div>
       </div>
@@ -398,19 +387,19 @@
   <div class="modal-overlay" id="completionModal">
     <div class="modal-card">
       <div style="font-size:64px; margin-bottom:8px;">🌟🏆🌟</div>
-      <div style="font-size:20px; font-weight:bold; color:#1e293b;" id="modalTitle">太棒了！全數通過！</div>
-      <div style="font-size:15px; color:#475569; margin-bottom:20px;" id="completionSummary">完成任務囉！</div>
-      <button class="modal-btn" onclick="closeModal('completionModal')">回到練習 ➔</button>
+      <div style="font-size:20px; font-weight:bold; color:#1e293b;" id="modalTitle">Awesome! Completed!</div>
+      <div style="font-size:15px; color:#475569; margin-bottom:20px;" id="completionSummary">You finished all tasks!</div>
+      <button class="modal-btn" onclick="closeModal('completionModal')">Continue Practice ➔</button>
     </div>
   </div>
 
   <div class="modal-overlay" id="editModal">
     <div class="modal-card" style="text-align:left;">
-      <div style="font-size:18px; font-weight:bold; text-align:center; margin-bottom:12px;">✏️ 編輯詞語任務</div>
+      <div style="font-size:18px; font-weight:bold; text-align:center; margin-bottom:12px;">✏️ 編輯任務</div>
       <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:15px;">
-        <input type="text" id="editTaskText" placeholder="中文詞語">
-        <input type="text" id="editTaskZhuyin" placeholder="注音答案">
-        <input type="text" id="editTaskMeaning" placeholder="詞語意思">
+        <input type="text" id="editTaskText" placeholder="詞語/Word">
+        <input type="text" id="editTaskZhuyin" placeholder="注音/Zhuyin">
+        <input type="text" id="editTaskMeaning" placeholder="意思/Meaning">
       </div>
       <div style="display:flex; gap:8px;">
         <button class="modal-btn" onclick="saveTaskEdit()" style="background:#16a34a;">儲存更新</button>
@@ -471,13 +460,12 @@
       return `${year}-${month}-${day}`;
     }
 
-    /* 📱 裝置模式切換控制 */
     function selectDeviceMode(mode) {
       document.body.className = `device-${mode}`;
       localStorage.setItem('preferredDeviceMode', mode);
       
-      const icons = { mobile: '📱', tablet: '平板', desktop: '💻' };
-      const labels = { mobile: '手機版', tablet: '平板版', desktop: '電腦版' };
+      const icons = { mobile: '📱', tablet: '📱', desktop: '💻' };
+      const labels = { mobile: 'Phone', tablet: 'Tablet', desktop: 'Desktop' };
       document.getElementById('currentDeviceIcon').textContent = icons[mode];
       document.getElementById('currentDeviceLabel').textContent = labels[mode];
 
@@ -560,9 +548,9 @@
 
       const endOfWeek = new Date(currentWeekStartDate);
       endOfWeek.setDate(endOfWeek.getDate() + 6);
-      document.getElementById('weekTitle').textContent = `${currentWeekStartDate.getFullYear()}年${currentWeekStartDate.getMonth() + 1}月`;
+      document.getElementById('weekTitle').textContent = `${currentWeekStartDate.getFullYear()}/${String(currentWeekStartDate.getMonth() + 1).padStart(2,'0')}`;
 
-      const dayNames = ['日', '一', '二', '三', '四', '五', '六'];
+      const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
       for (let i = 0; i < 7; i++) {
         const d = new Date(currentWeekStartDate);
@@ -582,17 +570,17 @@
           const compData = await compRes.json();
           if (compData) {
             if (compData.p1 && compData.p2) {
-              statusText = '🏆全通關'; statusClass = 'status-badge-complete';
+              statusText = '🏆 All Clear'; statusClass = 'status-badge-complete';
             } else if (compData.p1) {
-              statusText = '✅注音'; statusClass = 'status-badge-part';
+              statusText = '✅ Part 1'; statusClass = 'status-badge-part';
             } else if (compData.p2) {
-              statusText = '✅消消樂'; statusClass = 'status-badge-part';
+              statusText = '✅ Part 2'; statusClass = 'status-badge-part';
             }
           }
         } catch(e){}
 
         card.innerHTML = `
-          <div class="day-name">週${dayNames[i]}</div>
+          <div class="day-name">${dayNames[i]}</div>
           <div class="day-date">${d.getDate()}</div>
           <div class="day-status ${statusClass}">${statusText}</div>
         `;
@@ -628,18 +616,18 @@
       const select = document.getElementById('studentSelect');
       const filter = document.getElementById('adminStudentFilter');
       select.innerHTML = "";
-      filter.innerHTML = '<option value="ALL">全部學生彙總</option><option value="TEST_MODE">🧪 老師測試紀錄</option>';
+      filter.innerHTML = '<option value="ALL">全部學生彙總</option><option value="TEST_MODE">🧪 測試紀錄</option>';
 
       studentsList.forEach(name => {
         const opt = document.createElement('option'); opt.value = name; opt.textContent = name; select.appendChild(opt);
         const opt2 = document.createElement('option'); opt2.value = name; opt2.textContent = `👦 ${name} 的數據`; filter.appendChild(opt2);
       });
       select.value = currentStudent;
-      document.getElementById('targetPrompt').textContent = `👦 ${currentStudent}，請拼出這個詞的注音：`;
+      document.getElementById('targetPrompt').textContent = `👦 ${currentStudent}, enter Zhuyin for:`;
     }
 
     async function addNewStudent() {
-      const name = prompt("請輸入新學生姓名：");
+      const name = prompt("Enter new student's name:");
       if (!name || !name.trim()) return;
       const cleanName = name.trim();
       if (!studentsList.includes(cleanName)) {
@@ -651,7 +639,7 @@
 
     function changeCurrentStudent() {
       currentStudent = document.getElementById('studentSelect').value;
-      document.getElementById('targetPrompt').textContent = `👦 ${currentStudent}，請拼出這個詞的注音：`;
+      document.getElementById('targetPrompt').textContent = `👦 ${currentStudent}, enter Zhuyin for:`;
       loadStudentTasks();
     }
 
@@ -661,18 +649,18 @@
         document.getElementById('adminView').classList.remove('active');
         document.getElementById('studentView').classList.add('active');
         document.getElementById('userSelectBar').style.display = 'flex';
-        document.getElementById('toggleAdminBtn').textContent = "👑 老師後台";
-        document.getElementById('appTitle').textContent = "🎮 學生注音與意思練習";
+        document.getElementById('toggleAdminBtn').textContent = "👑 後台";
+        document.getElementById('appTitle').textContent = "🎮 Learning Center";
         loadStudentTasks();
       } else {
-        const pwd = prompt("請輸入老師後台密碼：");
+        const pwd = prompt("請輸入後台密碼：");
         if (pwd === "1214") {
           isAdmin = true;
           document.getElementById('studentView').classList.remove('active');
           document.getElementById('adminView').classList.add('active');
           document.getElementById('userSelectBar').style.display = 'none';
           document.getElementById('toggleAdminBtn').textContent = "🎮 切換回學生端";
-          document.getElementById('appTitle').textContent = "👑 老師後台與數據統計";
+          document.getElementById('appTitle').textContent = "👑 後台管理";
           loadAdminTasks();
         } else if (pwd !== null) alert("❌ 密碼錯誤！");
       }
@@ -694,9 +682,9 @@
 
     function updateFlashcardUI() {
       if (taskKeysArr.length === 0) {
-        document.getElementById('fcWord').textContent = "無題目";
+        document.getElementById('fcWord').textContent = "No Words";
         document.getElementById('fcZhuyin').textContent = "";
-        document.getElementById('fcMeaning').textContent = "無內容";
+        document.getElementById('fcMeaning').textContent = "No Tasks";
         document.getElementById('cardProgress').textContent = "0 / 0";
         return;
       }
@@ -705,7 +693,7 @@
       const task = currentTasks[taskKeysArr[flashcardIndex]];
       document.getElementById('fcWord').textContent = task.text || "";
       document.getElementById('fcZhuyin').textContent = task.zhuyin || "";
-      document.getElementById('fcMeaning').textContent = task.meaning || "尚未補充意思解釋";
+      document.getElementById('fcMeaning').textContent = task.meaning || "No definition available";
       document.getElementById('cardProgress').textContent = `${flashcardIndex + 1} / ${taskKeysArr.length}`;
     }
 
@@ -717,7 +705,7 @@
       if (taskKeysArr.length === 0) return;
       const task = currentTasks[taskKeysArr[flashcardIndex]];
       if (side === 'front') speakTTS(task.text);
-      else speakTTS(`${task.text}，${task.meaning || '無內容'}`);
+      else speakTTS(`${task.text}. ${task.meaning || ''}`);
     }
 
     function initMatchGame() {
@@ -730,7 +718,7 @@
 
       const validTasks = taskKeysArr.map(k => ({ id: k, ...currentTasks[k] })).filter(t => t.text && t.meaning);
       if (validTasks.length === 0) {
-        wordsCol.innerHTML = '<div style="color:#64748b; padding:20px;">沒有包含意思解釋的詞語！</div>';
+        wordsCol.innerHTML = '<div style="color:#64748b; padding:20px;">No matching tasks found!</div>';
         return;
       }
 
@@ -794,9 +782,9 @@
           await saveCompletionToFirebase('p2', true);
           document.getElementById('badgePart2').style.display = 'inline-block';
           renderWeekCalendar();
-          document.getElementById('modalTitle').textContent = `🎉 ${currentStudent} 詞義消消樂全通關！`;
-          document.getElementById('completionSummary').textContent = `成功配對並消除了所有的詞語與意思！`;
-          speakTTS(`${currentStudent}太棒了！完成了詞義消消樂！`, 0.8);
+          document.getElementById('modalTitle').textContent = `🎉 Great job, ${currentStudent}!`;
+          document.getElementById('completionSummary').textContent = `You cleared all word matches!`;
+          speakTTS(`Great job ${currentStudent}! You completed the matching game!`);
           setTimeout(() => document.getElementById('completionModal').classList.add('active'), 600);
         }
       } else {
@@ -851,8 +839,8 @@
 
         selectorEl.innerHTML = "";
         if (taskKeysArr.length === 0) {
-          selectorEl.innerHTML = "<span style='color:#64748b; font-size:13px;'>無練習任務！</span>";
-          document.getElementById('displayWord').textContent = "無任務";
+          selectorEl.innerHTML = "<span style='color:#64748b; font-size:13px;'>No tasks for today!</span>";
+          document.getElementById('displayWord').textContent = "No Tasks";
           currentTaskId = null; 
           updateFlashcardUI();
           if (currentPracticeMode === 2) initMatchGame();
@@ -863,7 +851,6 @@
         selectTask(taskKeysArr[0]);
         flashcardIndex = 0; 
 
-        // 🌟 關鍵修復：載入完新日期的資料後，保持學生原本停留在的模式！
         switchPracticeMode(currentPracticeMode);
 
       } catch(e){}
@@ -890,7 +877,7 @@
 
       const meaningEl = document.getElementById('meaningDisplay');
       if (taskStatusMap[id] === 'correct' && currentTasks[id].meaning) {
-        meaningEl.innerHTML = `📖 <b>詞語意思：</b> ${currentTasks[id].meaning}`;
+        meaningEl.innerHTML = `📖 <b>Meaning:</b> ${currentTasks[id].meaning}`;
         meaningEl.classList.add('active');
       } else meaningEl.classList.remove('active');
 
@@ -899,17 +886,17 @@
 
     async function checkAnswer() {
       const msgEl = document.getElementById('resultMessage');
-      if (!userTyped || !currentTaskId) return msgEl.textContent = "⚠️ 請先輸入注音！";
+      if (!userTyped || !currentTaskId) return msgEl.textContent = "⚠️ Please enter Zhuyin first!";
       const selectedDate = formatDateStr(selectedDateObj);
       const isCorrect = (cleanFormat(userTyped) === cleanFormat(correctZhuyinAnswer));
 
       if (isCorrect) {
-        playSfx('correct'); msgEl.className = "message success"; msgEl.innerHTML = "🎉 太棒了！答對了！";
+        playSfx('correct'); msgEl.className = "message success"; msgEl.innerHTML = "🎉 Excellent! Correct!";
         taskStatusMap[currentTaskId] = 'correct'; recordFirebaseStat(selectedDate, currentTaskId, 'part1', 'correct');
 
         if (currentTasks[currentTaskId].meaning) {
           const meaningEl = document.getElementById('meaningDisplay');
-          meaningEl.innerHTML = `📖 <b>詞語意思：</b> ${currentTasks[currentTaskId].meaning}`;
+          meaningEl.innerHTML = `📖 <b>Meaning:</b> ${currentTasks[currentTaskId].meaning}`;
           meaningEl.classList.add('active');
         }
 
@@ -920,9 +907,9 @@
           await saveCompletionToFirebase('p1', true);
           document.getElementById('badgePart1').style.display = 'inline-block';
           renderWeekCalendar();
-          document.getElementById('modalTitle').textContent = `🎉 ${currentStudent} 注音拼音全數通過！`;
-          document.getElementById('completionSummary').textContent = `成功拼出全部注音詞語！`;
-          speakTTS(`${currentStudent}太棒了！答對了所有的注音題目！`, 0.8);
+          document.getElementById('modalTitle').textContent = `🎉 Awesome, ${currentStudent}!`;
+          document.getElementById('completionSummary').textContent = `You completed all Zhuyin tasks!`;
+          speakTTS(`Awesome ${currentStudent}! You got all the answers right!`);
           setTimeout(() => document.getElementById('completionModal').classList.add('active'), 600);
         } else {
           setTimeout(autoNextTask, 1000);
@@ -931,7 +918,7 @@
         playSfx('wrong'); msgEl.className = "message error"; taskStatusMap[currentTaskId] = 'wrong';
         recordFirebaseStat(selectedDate, currentTaskId, 'part1', 'wrong');
         taskWrongCountMap[currentTaskId] = (taskWrongCountMap[currentTaskId] || 0) + 1;
-        msgEl.innerHTML = taskWrongCountMap[currentTaskId] === 1 ? `❌ 不太對喔，再試一次！` : `❌ 不太對！<br><button class="btn-show-answer" onclick="revealAnswer()">💡 顯示正確答案</button>`;
+        msgEl.innerHTML = taskWrongCountMap[currentTaskId] === 1 ? `❌ Not quite, try again!` : `❌ Incorrect!<br><button class="btn-show-answer" onclick="revealAnswer()">💡 Show Answer</button>`;
         renderTaskChip(currentTaskId, taskKeysArr.indexOf(currentTaskId), currentTasks[currentTaskId]);
       }
     }
@@ -942,14 +929,30 @@
       for (let i = 0; i < currIdx; i++) if (taskStatusMap[taskKeysArr[i]] !== 'correct') return selectTask(taskKeysArr[i]);
     }
 
-    function revealAnswer() { document.getElementById('resultMessage').innerHTML = `💡 正確答案：<b>${correctZhuyinAnswer}</b>`; }
+    function revealAnswer() { document.getElementById('resultMessage').innerHTML = `💡 Answer: <b>${correctZhuyinAnswer}</b>`; }
     function playZhuyinAudio(sym) { if (audioCache[sym]) { audioCache[sym].currentTime = 0; audioCache[sym].play().catch(() => speakTTS(sym)); } else speakTTS(sym); }
     
-    function speakTTS(text, rate = 0.7) {
+    /* 🔊 語音朗讀優化：中文慢速度(0.6)，英文優先選用美式專業發音 */
+    function speakTTS(text) {
+      if (!text) return;
       window.speechSynthesis.cancel();
-      const u = new SpeechSynthesisUtterance(text); u.lang = 'zh-TW'; u.rate = rate; window.speechSynthesis.speak(u);
+      const u = new SpeechSynthesisUtterance(text);
+      const isEnglish = /[a-zA-Z]/.test(text);
+
+      if (isEnglish) {
+        u.lang = 'en-US';
+        u.rate = 0.95; 
+        const voices = window.speechSynthesis.getVoices();
+        const preferredUsVoice = voices.find(v => v.lang.includes('en') && (v.name.includes('Google') || v.name.includes('Samantha') || v.name.includes('Natural') || v.name.includes('US')));
+        if (preferredUsVoice) u.voice = preferredUsVoice;
+      } else {
+        u.lang = 'zh-TW';
+        u.rate = 0.6; 
+      }
+      window.speechSynthesis.speak(u);
     }
-    function playWordTTS() { if (currentTaskText) speakTTS(currentTaskText, 0.7); }
+
+    function playWordTTS() { if (currentTaskText) speakTTS(currentTaskText); }
 
     function renderKeyboard() {
       const kbContainer = document.getElementById('keyboard'); kbContainer.innerHTML = '';
@@ -964,9 +967,9 @@
       });
       const actionRow = document.createElement('div'); actionRow.className = 'kb-row';
       actionRow.innerHTML = `
-        <button class="key-btn action" onclick="userTyped=userTyped.slice(0,-1);updateDisplay();">⌫ 刪除</button>
-        <button class="key-btn action" onclick="userTyped='';updateDisplay();">清空</button>
-        <button class="key-btn submit" onclick="checkAnswer()">選好確認 ✔</button>
+        <button class="key-btn action" onclick="userTyped=userTyped.slice(0,-1);updateDisplay();">⌫ Delete</button>
+        <button class="key-btn action" onclick="userTyped='';updateDisplay();">Clear</button>
+        <button class="key-btn submit" onclick="checkAnswer()">Submit ✔</button>
       `;
       kbContainer.appendChild(actionRow);
     }
@@ -974,7 +977,7 @@
     function updateDisplay() { document.getElementById('userInputDisplay').textContent = userTyped; }
     function closeModal(id) { document.getElementById(id).classList.remove('active'); }
 
-    /* 👑 後台管理 */
+    /* 後台管理 functions */
     async function loadAdminTasks() {
       const date = document.getElementById('adminDatePicker').value;
       const selectedFilter = document.getElementById('adminStudentFilter').value;
@@ -1020,9 +1023,9 @@
                 <b>${index + 1}. ${item.text}</b> <span style="font-size:12px; color:#64748b;">(${item.zhuyin || '未設定'})</span>
                 <br><span style="font-size:12px; color:#475569;">📖 ${item.meaning || '無解釋'}</span>
                 <div style="margin-top:4px;">
-                  <span style="font-size:11px; font-weight:bold; color:#475569;">第一部分:</span>
+                  <span style="font-size:11px; font-weight:bold; color:#475569;">Part 1 (注音):</span>
                   <span class="stat-badge badge-correct">對:${p1_c}</span><span class="stat-badge badge-wrong">錯:${p1_w}</span> | 
-                  <span style="font-size:11px; font-weight:bold; color:#475569;">第二部分:</span>
+                  <span style="font-size:11px; font-weight:bold; color:#475569;">Part 2 (消消樂):</span>
                   <span class="stat-badge badge-correct">配對:${p2_c}</span><span class="stat-badge badge-wrong">錯:${p2_w}</span>
                 </div>
               </div>
@@ -1076,7 +1079,7 @@
       const text = document.getElementById('newTaskInput').value.trim();
       const zhuyin = cleanFormat(document.getElementById('newTaskZhuyin').value.trim());
       const meaning = document.getElementById('newTaskMeaning').value.trim();
-      if (!text || !zhuyin) return alert("請填寫國字與注音！");
+      if (!text || !zhuyin) return alert("請填寫詞語與注音！");
 
       await fetch(`${FIREBASE_ROOT}/dailyTasks/${date}.json`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
