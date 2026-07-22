@@ -298,7 +298,7 @@
             <div class="flashcard-back">
               <div style="font-size:13px; color:#166534; margin-bottom:6px;">📖 Definition:</div>
               <div class="fc-meaning" id="fcMeaning">Meaning explanation...</div>
-              <button class="sound-btn" onclick="event.stopPropagation(); playCurrentCardTTS('back')" style="margin-top:15px; background:#16a34a;">🔊 Listen All</button>
+              <button class="sound-btn" onclick="event.stopPropagation(); playCurrentCardTTS('back')" style="margin-top:15px; background:#16a34a;">🔊 Listen Meaning</button>
             </div>
           </div>
         </div>
@@ -704,8 +704,12 @@
     function playCurrentCardTTS(side) {
       if (taskKeysArr.length === 0) return;
       const task = currentTasks[taskKeysArr[flashcardIndex]];
-      if (side === 'front') speakTTS(task.text);
-      else speakTTS(`${task.text}. ${task.meaning || ''}`);
+      if (side === 'front') {
+        speakTTS(task.text);
+      } else {
+        // 卡片背面：只朗讀「定義 / 意思」的輸入內容
+        speakTTS(task.meaning || 'No definition available');
+      }
     }
 
     function initMatchGame() {
@@ -932,7 +936,7 @@
     function revealAnswer() { document.getElementById('resultMessage').innerHTML = `💡 Answer: <b>${correctZhuyinAnswer}</b>`; }
     function playZhuyinAudio(sym) { if (audioCache[sym]) { audioCache[sym].currentTime = 0; audioCache[sym].play().catch(() => speakTTS(sym)); } else speakTTS(sym); }
     
-    /* 🔊 語音朗讀優化：中文慢速度(0.6)，英文優先選用美式專業發音 */
+    /* 🔊 語音朗讀優化：中文極致慢速度 (0.45)，英文優先選用美式專業發音 (0.95) */
     function speakTTS(text) {
       if (!text) return;
       window.speechSynthesis.cancel();
@@ -947,7 +951,7 @@
         if (preferredUsVoice) u.voice = preferredUsVoice;
       } else {
         u.lang = 'zh-TW';
-        u.rate = 0.6; 
+        u.rate = 0.45; // 超慢中文語速
       }
       window.speechSynthesis.speak(u);
     }
