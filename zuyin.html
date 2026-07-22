@@ -1,0 +1,1124 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>注音與詞義多功能學習系統</title>
+  <style>
+    :root {
+      --primary: #4f46e5;
+      --primary-hover: #4338ca;
+      --bg: #f0f4f8;
+      --card-bg: #ffffff;
+      --accent: #059669;
+      --danger: #dc2626;
+      --user-theme: #d97706;
+      --max-width: 650px;
+      --font-scale: 1;
+    }
+
+    /* 📱 裝置模式套用類別 */
+    body.device-mobile {
+      --max-width: 480px;
+      --font-scale: 1.1;
+    }
+    body.device-tablet {
+      --max-width: 820px;
+      --font-scale: 1.05;
+    }
+    body.device-desktop {
+      --max-width: 1050px;
+      --font-scale: 1;
+    }
+
+    body {
+      font-family: 'PingFang TC', 'Microsoft JhengHei', sans-serif;
+      background-color: var(--bg);
+      margin: 0;
+      padding: 15px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      color: #334155;
+      font-size: calc(16px * var(--font-scale));
+    }
+
+    /* 🖥️ 裝置選擇迎賓彈窗 (Welcome Screen) */
+    .device-modal-overlay {
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(5px);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 9999; opacity: 1; transition: opacity 0.3s ease;
+    }
+    .device-modal-overlay.hidden {
+      opacity: 0; pointer-events: none;
+    }
+    .device-card {
+      background: white; padding: 30px 20px; border-radius: 24px;
+      text-align: center; max-width: 480px; width: 90%;
+      box-shadow: 0 20px 25px -5px rgba(0,0,0,0.2);
+    }
+    .device-options {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 20px;
+    }
+    .device-btn {
+      background: #f1f5f9; border: 2px solid #cbd5e1; border-radius: 16px;
+      padding: 18px 8px; cursor: pointer; transition: all 0.2s;
+      display: flex; flex-direction: column; align-items: center; gap: 8px;
+    }
+    .device-btn:hover {
+      border-color: var(--primary); background: #e0e7ff; transform: translateY(-3px);
+    }
+    .device-icon { font-size: 36px; }
+    .device-title { font-weight: bold; font-size: 15px; color: #1e293b; }
+
+    /* 頂部列與裝置切換器 */
+    .top-bar {
+      width: 100%; max-width: var(--max-width);
+      display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;
+      transition: max-width 0.3s ease;
+    }
+    .app-title { font-size: 18px; font-weight: bold; color: #1e293b; }
+
+    .device-switch-tag {
+      background: #e2e8f0; border: none; padding: 4px 10px; border-radius: 20px;
+      font-size: 12px; font-weight: bold; color: #475569; cursor: pointer; display: flex; align-items: center; gap: 4px;
+    }
+
+    .container {
+      max-width: var(--max-width); width: 100%; background: var(--card-bg); padding: 20px;
+      border-radius: 16px; box-shadow: 0 4px 16px rgba(0,0,0,0.08); box-sizing: border-box; margin-bottom: 20px;
+      transition: max-width 0.3s ease;
+    }
+
+    /* 👤 學生選擇列 */
+    .user-select-bar {
+      display: flex; align-items: center; gap: 10px; background: #fef3c7;
+      border: 1px solid #fde68a; padding: 10px 14px; border-radius: 10px; margin-bottom: 15px;
+    }
+    select.user-dropdown {
+      padding: 6px 12px; font-size: 15px; font-weight: bold; border-radius: 6px;
+      border: 1px solid #cbd5e1; background: white; color: var(--user-theme);
+    }
+    .btn-add-user {
+      background: var(--user-theme); color: white; border: none; padding: 6px 12px;
+      border-radius: 6px; font-size: 13px; font-weight: bold; cursor: pointer;
+    }
+
+    /* 📅 週日曆區域 */
+    .week-calendar-container {
+      background: #e0f2fe; padding: 12px; border-radius: 12px; border: 2px solid #38bdf8; margin-bottom: 15px;
+    }
+    .week-nav-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    .week-nav-btn {
+      background: #0284c7; color: white; border: none; padding: 6px 12px; border-radius: 6px;
+      font-size: 13px; font-weight: bold; cursor: pointer;
+    }
+    .week-days-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+    .day-card {
+      background: white; border: 2px solid #cbd5e1; border-radius: 8px; padding: 6px 2px;
+      text-align: center; cursor: pointer; transition: all 0.2s; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    }
+    .day-card.active { border-color: #0284c7; background: #bae6fd; font-weight: bold; }
+    .day-name { font-size: 11px; color: #64748b; }
+    .day-date { font-size: 14px; font-weight: bold; color: #0369a1; margin: 2px 0; }
+    .day-status { font-size: 10px; font-weight: bold; border-radius: 4px; padding: 1px 2px; line-height: 1.1; word-break: break-all; }
+    .status-badge-complete { background: #dcfce7; color: #15803d; }
+    .status-badge-part { background: #fef9c3; color: #a16207; }
+
+    /* 🎮 三大模式切換列 */
+    .mode-switch-bar { display: flex; gap: 6px; margin-bottom: 15px; }
+    .mode-btn {
+      flex: 1; padding: 12px 4px; font-size: 14px; font-weight: bold; border: 2px solid #cbd5e1;
+      background: #f1f5f9; color: #64748b; border-radius: 10px; cursor: pointer;
+      transition: all 0.2s; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    }
+    .mode-btn.active {
+      background: var(--primary); color: white; border-color: var(--primary);
+      box-shadow: 0 4px 10px rgba(79, 70, 229, 0.3);
+    }
+    .badge-done { font-size: 11px; background: #22c55e; color: white; padding: 2px 6px; border-radius: 10px; margin-top: 2px; }
+
+    .view-section { display: none; }
+    .view-section.active { display: block; }
+
+    /* 🎴 模式 0：單字卡 翻牌樣式 */
+    .flashcard-wrapper { perspective: 1000px; width: 100%; height: 230px; margin: 15px 0; cursor: pointer; }
+    .flashcard-inner {
+      position: relative; width: 100%; height: 100%; text-align: center; transition: transform 0.6s;
+      transform-style: preserve-3d; border-radius: 16px; box-shadow: 0 6px 16px rgba(0,0,0,0.1);
+    }
+    .flashcard-wrapper.flipped .flashcard-inner { transform: rotateY(180deg); }
+    .flashcard-front, .flashcard-back {
+      position: absolute; width: 100%; height: 100%; -webkit-backface-visibility: hidden; backface-visibility: hidden;
+      border-radius: 16px; border: 2px solid #cbd5e1; display: flex; flex-direction: column; align-items: center; justify-content: center; box-sizing: border-box; padding: 15px;
+    }
+    .flashcard-front { background: #ffffff; color: #1e1b4b; }
+    .flashcard-back { background: #f0fdf4; border-color: #86efac; color: #166534; transform: rotateY(180deg); }
+    .fc-word { font-size: 42px; font-weight: bold; }
+    .fc-zhuyin { font-size: 20px; color: #64748b; margin-top: 4px; }
+    .fc-meaning { font-size: 22px; font-weight: bold; }
+    .card-nav-btns { display: flex; justify-content: space-between; gap: 10px; width: 100%; margin-top: 10px; }
+    .nav-btn { flex: 1; padding: 12px; background: #e2e8f0; border: none; border-radius: 8px; font-size: 15px; font-weight: bold; cursor: pointer; }
+
+    /* 🧩 模式 2：對對碰卡片樣式 */
+    .match-game-container { display: flex; gap: 12px; margin-top: 15px; }
+    .match-column { flex: 1; display: flex; flex-direction: column; gap: 10px; }
+    .match-card {
+      background: #ffffff; border: 2px solid #cbd5e1; border-radius: 12px; padding: 12px; text-align: center;
+      font-size: 17px; font-weight: bold; color: #1e293b; cursor: pointer; user-select: none;
+      transition: all 0.2s; min-height: 55px; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    }
+    .match-card:hover { border-color: var(--primary); transform: translateY(-2px); }
+    .match-card.selected { border-color: var(--primary); background: #e0e7ff; color: var(--primary); }
+    .match-card.matched { opacity: 0; transform: scale(0.5); pointer-events: none; }
+
+    /* ⌨️ 鍵盤樣式 */
+    .target-card { background: #fffbebf5; border: 2px solid #fde68a; border-radius: 12px; padding: 16px; text-align: center; margin-bottom: 15px; }
+    .target-word { font-size: 48px; font-weight: bold; color: #1e1b4b; margin: 8px 0; letter-spacing: 4px; }
+    .sound-btn { background-color: var(--accent); color: white; font-size: 14px; font-weight: bold; padding: 8px 16px; border: none; border-radius: 8px; cursor: pointer; }
+    .meaning-box { display: none; margin-top: 10px; padding: 10px 14px; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; color: #166534; font-size: 15px; text-align: center; font-weight: 500; }
+    .meaning-box.active { display: block; }
+
+    .user-input-box { font-size: 26px; font-weight: bold; letter-spacing: 6px; min-height: 46px; background: #f8fafc; border: 2px dashed #94a3b8; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #0f172a; margin-bottom: 10px; }
+    .keyboard-container { display: flex; flex-direction: column; gap: 6px; width: 100%; }
+    .kb-row { display: flex; gap: 4px; justify-content: center; width: 100%; }
+    .key-btn {
+      flex: 1; padding: 12px 0; font-size: 16px; font-weight: bold; background: #ffffff; color: #334155;
+      border: 1px solid #cbd5e1; border-radius: 6px; cursor: pointer; box-shadow: 0 2px 0 #cbd5e1; text-align: center;
+    }
+    .key-btn.tone { background: #fef3c7; border-color: #fde68a; color: #b45309; }
+    .key-btn:active { transform: translateY(2px); box-shadow: none; }
+    .key-btn.action { flex: 1.5; background: #f1f5f9; font-size: 14px; }
+    .key-btn.submit { flex: 2.5; background: #16a34a; color: white; font-size: 14px; }
+
+    .message { text-align: center; font-size: 16px; font-weight: bold; min-height: 28px; margin-bottom: 10px; line-height: 1.5; }
+    .success { color: #16a34a; }
+    .error { color: #dc2626; }
+    .btn-show-answer { background: #d97706; color: white; border: none; padding: 6px 14px; border-radius: 6px; font-size: 13px; font-weight: bold; cursor: pointer; margin-top: 6px; display: inline-block; }
+
+    .task-selector { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 8px; margin-bottom: 12px; }
+    .task-chip { padding: 8px 14px; background: #e2e8f0; border-radius: 20px; font-size: 14px; font-weight: bold; cursor: pointer; white-space: nowrap; display: flex; align-items: center; gap: 4px; }
+    .task-chip.active { background: var(--user-theme); color: white; }
+
+    /* Modal 視窗 */
+    .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 23, 42, 0.75); display: flex; align-items: center; justify-content: center; z-index: 1000; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
+    .modal-overlay.active { opacity: 1; pointer-events: auto; }
+    .modal-card { background: white; padding: 25px 20px; border-radius: 20px; text-align: center; max-width: 420px; width: 90%; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+    .modal-btn { background-color: var(--primary); color: white; border: none; padding: 10px 20px; border-radius: 8px; font-size: 15px; font-weight: bold; cursor: pointer; width: 100%; }
+
+    /* 👑 管理員相關 */
+    .admin-toggle-btn { background: #e2e8f0; color: #475569; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: bold; }
+    .admin-toggle-btn:hover { background: #cbd5e1; }
+    .admin-tab-group { display: flex; gap: 8px; margin-bottom: 12px; }
+    .tab-btn { flex: 1; padding: 8px; border: 1px solid #cbd5e1; background: #f1f5f9; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 14px; }
+    .tab-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    .task-list { list-style: none; padding: 0; margin: 0; }
+    .task-item { display: flex; justify-content: space-between; align-items: center; background: #f8fafc; border: 1px solid #e2e8f0; padding: 10px 14px; border-radius: 8px; margin-bottom: 8px; }
+    .stat-badge { font-size: 12px; padding: 2px 6px; border-radius: 4px; margin-left: 4px; font-weight: bold; }
+    .badge-correct { background: #dcfce7; color: #15803d; }
+    .badge-wrong { background: #fee2e2; color: #b91c1c; }
+    .btn-edit { background: #3b82f6; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 12px; margin-left: 6px; }
+    .btn-del { background: #ef4444; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 12px; margin-left: 6px; }
+    .batch-action-bar { display: flex; justify-content: space-between; align-items: center; background: #f1f5f9; padding: 8px 12px; border-radius: 8px; margin-bottom: 10px; border: 1px solid #cbd5e1; }
+
+    input[type="date"], input[type="text"], textarea { padding: 8px 12px; font-size: 15px; border: 2px solid #cbd5e1; border-radius: 8px; outline: none; font-family: inherit; }
+    button.btn-primary { padding: 8px 16px; font-size: 15px; font-weight: bold; color: white; background-color: var(--primary); border: none; border-radius: 8px; cursor: pointer; }
+  </style>
+
+  <script src="https://cdn.jsdelivr.net/npm/pinyin-pro@3.19.6/dist/index.js"></script>
+</head>
+<body class="device-mobile">
+
+  <div class="device-modal-overlay" id="deviceModal">
+    <div class="device-card">
+      <div style="font-size: 40px; margin-bottom: 8px;">👋 歡迎使用！</div>
+      <div style="font-size: 18px; font-weight: bold; color: #1e293b;">請選擇您目前的使用的裝置：</div>
+      <div style="font-size: 13px; color: #64748b; margin-top: 4px;">系統將自動切換最舒適的字體與畫面配置</div>
+      
+      <div class="device-options">
+        <div class="device-btn" onclick="selectDeviceMode('mobile')">
+          <div class="device-icon">📱</div>
+          <div class="device-title">智慧手機</div>
+        </div>
+        <div class="device-btn" onclick="selectDeviceMode('tablet')">
+          <div class="device-icon">平板電腦</div>
+          <div class="device-title">iPad / 平板</div>
+        </div>
+        <div class="device-btn" onclick="selectDeviceMode('desktop')">
+          <div class="device-icon">💻</div>
+          <div class="device-title">桌上型電腦</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="top-bar">
+    <div style="display:flex; align-items:center; gap:8px;">
+      <div class="app-title" id="appTitle">🎮 學生注音與意思練習</div>
+      <button class="device-switch-tag" onclick="showDeviceSelectModal()" title="重新切換裝置模式">
+        <span id="currentDeviceIcon">📱</span> <span id="currentDeviceLabel">手機</span> ⚙️
+      </button>
+    </div>
+    <button class="admin-toggle-btn" id="toggleAdminBtn" onclick="handleAdminAccess()">👑 老師後台</button>
+  </div>
+
+  <div class="container">
+    <div class="user-select-bar" id="userSelectBar">
+      <label style="font-weight:bold; color:#78350f;">👦 當前學生：</label>
+      <select class="user-dropdown" id="studentSelect" onchange="changeCurrentStudent()"></select>
+      <button class="btn-add-user" onclick="addNewStudent()">➕ 新增學生</button>
+    </div>
+
+    <section id="studentView" class="view-section active">
+      <div class="week-calendar-container">
+        <div class="week-nav-bar">
+          <button class="week-nav-btn" onclick="changeWeek(-1)">⬅️ 上一週</button>
+          <div style="font-weight:bold; color:#0369a1; font-size:15px;" id="weekTitle">2026年7月</div>
+          <input type="date" id="studentDatePicker" style="padding:2px 6px; font-size:12px;" onchange="syncDateFromPicker()">
+          <button class="week-nav-btn" onclick="changeWeek(1)">下一週 ➡️</button>
+        </div>
+        <div class="week-days-grid" id="weekDaysGrid"></div>
+      </div>
+
+      <div class="mode-switch-bar">
+        <div class="mode-btn active" id="btnMode0" onclick="switchPracticeMode(0)">
+          <span>🎴 單字卡學習</span>
+        </div>
+        <div class="mode-btn" id="btnMode1" onclick="switchPracticeMode(1)">
+          <span>✍️ 第一部分：注音拼音</span>
+          <span class="badge-done" id="badgePart1" style="display:none;">✅ 已通關</span>
+        </div>
+        <div class="mode-btn" id="btnMode2" onclick="switchPracticeMode(2)">
+          <span>🧩 第二部分：詞義消消樂</span>
+          <span class="badge-done" id="badgePart2" style="display:none;">✅ 已通關</span>
+        </div>
+      </div>
+
+      <div id="practiceMode0">
+        <div style="font-size:13px; color:#64748b; text-align:center;">💡 點擊卡片可翻面看意思；按聲音按鈕可朗讀！</div>
+        <div class="flashcard-wrapper" id="flashcard" onclick="toggleCardFlip()">
+          <div class="flashcard-inner">
+            <div class="flashcard-front">
+              <div class="fc-word" id="fcWord">國字</div>
+              <div class="fc-zhuyin" id="fcZhuyin">ㄍㄨㄛˊ ㄗˋ</div>
+              <button class="sound-btn" onclick="event.stopPropagation(); playCurrentCardTTS('front')" style="margin-top:15px;">🔊 朗讀國字</button>
+            </div>
+            <div class="flashcard-back">
+              <div style="font-size:13px; color:#166534; margin-bottom:6px;">📖 詞語意思：</div>
+              <div class="fc-meaning" id="fcMeaning">詞語意思解釋...</div>
+              <button class="sound-btn" onclick="event.stopPropagation(); playCurrentCardTTS('back')" style="margin-top:15px; background:#16a34a;">🔊 朗讀詞語與意思</button>
+            </div>
+          </div>
+        </div>
+        <div class="card-nav-btns">
+          <button class="nav-btn" onclick="prevFlashcard()">⬅️ 上一張</button>
+          <span id="cardProgress" style="align-self:center; font-weight:bold; color:#475569;">1 / 1</span>
+          <button class="nav-btn" onclick="nextFlashcard()">下一張 ➡️</button>
+        </div>
+      </div>
+
+      <div id="practiceMode1" style="display:none;">
+        <h2 style="font-size:16px; margin-top:0;">📋 選擇挑戰詞語：</h2>
+        <div class="task-selector" id="taskSelector"></div>
+
+        <div class="target-card">
+          <div id="targetPrompt">請拼出這個詞的注音：</div>
+          <div class="target-word" id="displayWord">請選擇任務</div>
+          <button class="sound-btn" onclick="playWordTTS()">🔊 朗讀中文詞</button>
+          <div class="meaning-box" id="meaningDisplay"></div>
+        </div>
+
+        <div class="user-input-box" id="userInputDisplay"></div>
+        <div class="message" id="resultMessage"></div>
+        <div class="keyboard-container" id="keyboard"></div>
+      </div>
+
+      <div id="practiceMode2" style="display:none;">
+        <h2 style="text-align:center; font-size:16px;">🧩 配對詞語與意思：點擊正確答案消掉它！</h2>
+        <div class="message" id="matchResultMessage"></div>
+        <div class="match-game-container">
+          <div class="match-column" id="wordsColumn"></div>
+          <div class="match-column" id="meaningsColumn"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="adminView" class="view-section">
+      <h2 style="font-size:18px;">👑 老師控制台：日期任務與學生數據統計</h2>
+      
+      <div style="margin-bottom:15px;">
+        <label style="font-weight:bold; font-size:15px; color:#0369a1;">發佈/檢視日期：</label>
+        <input type="date" id="adminDatePicker" onchange="loadAdminTasks()">
+      </div>
+
+      <div style="margin-bottom:15px; background:#f8fafc; padding:12px; border-radius:8px; border:1px solid #cbd5e1;">
+        <div class="admin-tab-group">
+          <button class="tab-btn active" onclick="switchAddTab('single')">✏️ 單筆新增</button>
+          <button class="tab-btn" onclick="switchAddTab('batch')">📋 Excel 批次貼上</button>
+        </div>
+
+        <div id="tabSingle" class="tab-content active">
+          <div style="display:flex; flex-direction:column; gap:8px;">
+            <div style="display:flex; gap:8px;">
+              <input type="text" id="newTaskInput" placeholder="中文（例如：蘋果）" oninput="autoFillZhuyin()" style="flex:1;">
+              <input type="text" id="newTaskZhuyin" placeholder="注音（例如：ㄆㄧㄥˊㄍㄨㄛˇ）" style="flex:1;">
+            </div>
+            <div style="display:flex; gap:8px;">
+              <input type="text" id="newTaskMeaning" placeholder="詞語意思（例如：甜甜的水果）" style="flex:2;">
+              <button class="btn-primary" onclick="addTask()">新增任務</button>
+            </div>
+          </div>
+        </div>
+
+        <div id="tabBatch" class="tab-content">
+          <textarea id="batchInput" style="width:100%; height:80px; box-sizing:border-box; margin-bottom:8px;" placeholder="蘋果  ㄆㄧㄥˊㄍㄨㄛˇ  甜甜的水果"></textarea>
+          <button class="btn-primary" onclick="addBatchTasks()" style="width:100%; background:#059669;">🚀 批次匯入</button>
+        </div>
+      </div>
+
+      <div style="margin-bottom:12px; display:flex; align-items:center; gap:10px; background:#e0e7ff; padding:8px 12px; border-radius:8px;">
+        <label style="font-weight:bold; color:#1e1b4b; font-size:14px;">📊 檢視學生數據：</label>
+        <select id="adminStudentFilter" onchange="loadAdminTasks()" style="padding:4px 8px; border-radius:6px; font-weight:bold;"></select>
+      </div>
+
+      <div class="batch-action-bar">
+        <label style="font-weight:bold; cursor:pointer; font-size:14px;">
+          <input type="checkbox" id="selectAllCheckbox" onchange="toggleSelectAll(this)" style="cursor:pointer; transform:scale(1.2);"> 全選
+        </label>
+        <button class="btn-del" onclick="deleteSelectedTasks()" style="padding:6px 12px; font-size:13px; font-weight:bold;">🗑️ 刪除勾選題目</button>
+      </div>
+
+      <ul class="task-list" id="adminTaskList"></ul>
+    </section>
+  </div>
+
+  <div class="modal-overlay" id="completionModal">
+    <div class="modal-card">
+      <div style="font-size:64px; margin-bottom:8px;">🌟🏆🌟</div>
+      <div style="font-size:20px; font-weight:bold; color:#1e293b;" id="modalTitle">太棒了！全數通過！</div>
+      <div style="font-size:15px; color:#475569; margin-bottom:20px;" id="completionSummary">完成任務囉！</div>
+      <button class="modal-btn" onclick="closeModal('completionModal')">回到練習 ➔</button>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="editModal">
+    <div class="modal-card" style="text-align:left;">
+      <div style="font-size:18px; font-weight:bold; text-align:center; margin-bottom:12px;">✏️ 編輯詞語任務</div>
+      <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:15px;">
+        <input type="text" id="editTaskText" placeholder="中文詞語">
+        <input type="text" id="editTaskZhuyin" placeholder="注音答案">
+        <input type="text" id="editTaskMeaning" placeholder="詞語意思">
+      </div>
+      <div style="display:flex; gap:8px;">
+        <button class="modal-btn" onclick="saveTaskEdit()" style="background:#16a34a;">儲存更新</button>
+        <button class="modal-btn" onclick="closeModal('editModal')" style="background:#64748b;">取消</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const FIREBASE_ROOT = "https://zuyin-f8797-default-rtdb.firebaseio.com";
+    const AUDIO_BASE = "https://language.moe.gov.tw/001/Upload/files/site_content/M0001/juyin/html_ch/audio/";
+
+    const STANDARD_KEYBOARD_ROWS = [
+      ['ㄅ','ㄉ','ˇ','ˋ','ㄓ','ˊ','˙','ㄚ','ㄞ','ㄢ','ㄦ'],
+      ['ㄆ','ㄊ','ㄍ','ㄐ','ㄔ','ㄗ','ㄧ','ㄛ','ㄟ','ㄣ'],
+      ['ㄇ','ㄋ','ㄎ','ㄑ','ㄕ','ㄖ','ㄘ','ㄨ','ㄜ','ㄠ','ㄤ'],
+      ['ㄈ','ㄌ','ㄏ','ㄒ','ㄙ','ㄩ','ㄝ','ㄡ','ㄥ']
+    ];
+
+    const ZHUYIN_AUDIO_MAP = {
+      'ㄅ':'F1','ㄆ':'F2','ㄇ':'F3','ㄈ':'F4','ㄉ':'F5','ㄊ':'F6','ㄋ':'F7','ㄌ':'F8','ㄍ':'F9','ㄎ':'F10',
+      'ㄏ':'F11','ㄐ':'F12','ㄑ':'F13','ㄒ':'F14','ㄓ':'F15','ㄔ':'F16','ㄕ':'F17','ㄖ':'F18','ㄗ':'F19','ㄘ':'F20',
+      'ㄙ':'F21','ㄚ':'F22','ㄛ':'F23','ㄜ':'F24','ㄝ':'F25','ㄞ':'F26','ㄟ':'F27','ㄠ':'F28','ㄡ':'F29','ㄢ':'F30',
+      'ㄣ':'F31','ㄤ':'F32','ㄥ':'F33','ㄦ':'F34','ㄧ':'F35','ㄨ':'F36','ㄩ':'F37','ˊ':'F38','ˇ':'F39','ˋ':'F40','˙':'F41'
+    };
+
+    const audioCache = {};
+    let audioCtx = null;
+    let isAdmin = false;
+    let currentStudent = "Evan"; 
+    let studentsList = ["Evan"];
+    let currentTasks = {};
+    let taskKeysArr = [];
+    let currentPracticeMode = 0; 
+
+    let taskStatusMap = {}; 
+    let taskWrongCountMap = {};
+    let currentTaskId = null;
+    let currentTaskText = "";
+    let correctZhuyinAnswer = "";
+    let userTyped = "";
+    let flashcardIndex = 0;
+    let isPart1Completed = false;
+    let isPart2Completed = false;
+
+    let matchMatchedIds = new Set();
+    let selectedWordCard = null;
+    let selectedMeaningCard = null;
+
+    let selectedDateObj = new Date(); 
+    let currentWeekStartDate = new Date();
+
+    function cleanFormat(str) { return str ? str.replace(/\s+/g, '').normalize('NFC') : ''; }
+    function formatDateStr(d) {
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    }
+
+    /* 📱 裝置模式切換控制 */
+    function selectDeviceMode(mode) {
+      document.body.className = `device-${mode}`;
+      localStorage.setItem('preferredDeviceMode', mode);
+      
+      const icons = { mobile: '📱', tablet: '平板', desktop: '💻' };
+      const labels = { mobile: '手機版', tablet: '平板版', desktop: '電腦版' };
+      document.getElementById('currentDeviceIcon').textContent = icons[mode];
+      document.getElementById('currentDeviceLabel').textContent = labels[mode];
+
+      document.getElementById('deviceModal').classList.add('hidden');
+    }
+
+    function showDeviceSelectModal() {
+      document.getElementById('deviceModal').classList.remove('hidden');
+    }
+
+    function autoDetectDevice() {
+      const saved = localStorage.getItem('preferredDeviceMode');
+      if (saved) return selectDeviceMode(saved);
+
+      const w = window.innerWidth;
+      if (w >= 1024) selectDeviceMode('desktop');
+      else if (w >= 600) selectDeviceMode('tablet');
+      else selectDeviceMode('mobile');
+
+      showDeviceSelectModal();
+    }
+
+    function playSfx(type) {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain); gain.connect(audioCtx.destination);
+
+      if (type === 'correct') {
+        const now = audioCtx.currentTime;
+        osc.type = 'sine'; osc.frequency.setValueAtTime(659.25, now); osc.frequency.setValueAtTime(880, now + 0.12);
+        gain.gain.setValueAtTime(0.3, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
+        osc.start(now); osc.stop(now + 0.4);
+      } else if (type === 'wrong') {
+        const now = audioCtx.currentTime;
+        osc.type = 'sawtooth'; osc.frequency.setValueAtTime(180, now); osc.frequency.setValueAtTime(140, now + 0.15);
+        gain.gain.setValueAtTime(0.3, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.35);
+        osc.start(now); osc.stop(now + 0.35);
+      }
+    }
+
+    async function init() {
+      autoDetectDevice();
+
+      Object.keys(ZHUYIN_AUDIO_MAP).forEach(sym => {
+        try { audioCache[sym] = new Audio(AUDIO_BASE + ZHUYIN_AUDIO_MAP[sym] + ".WAV"); } catch(e){}
+      });
+      if (window.speechSynthesis) {
+        window.speechSynthesis.getVoices();
+        window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices();
+      }
+      
+      const today = new Date();
+      selectedDateObj = today;
+      setWeekStartFromDate(today);
+
+      document.getElementById('studentDatePicker').value = formatDateStr(today);
+      document.getElementById('adminDatePicker').value = formatDateStr(today);
+
+      renderKeyboard();
+      await fetchStudentsList();
+      await loadStudentTasks();
+    }
+
+    function setWeekStartFromDate(d) {
+      const dayOfWeek = d.getDay(); 
+      currentWeekStartDate = new Date(d);
+      currentWeekStartDate.setDate(d.getDate() - dayOfWeek);
+    }
+
+    function changeWeek(offset) {
+      currentWeekStartDate.setDate(currentWeekStartDate.getDate() + (offset * 7));
+      renderWeekCalendar();
+    }
+
+    async function renderWeekCalendar() {
+      const grid = document.getElementById('weekDaysGrid');
+      grid.innerHTML = '';
+
+      const endOfWeek = new Date(currentWeekStartDate);
+      endOfWeek.setDate(endOfWeek.getDate() + 6);
+      document.getElementById('weekTitle').textContent = `${currentWeekStartDate.getFullYear()}年${currentWeekStartDate.getMonth() + 1}月`;
+
+      const dayNames = ['日', '一', '二', '三', '四', '五', '六'];
+
+      for (let i = 0; i < 7; i++) {
+        const d = new Date(currentWeekStartDate);
+        d.setDate(d.getDate() + i);
+        const dateStr = formatDateStr(d);
+
+        const card = document.createElement('div');
+        const isSelected = dateStr === formatDateStr(selectedDateObj);
+        card.className = `day-card ${isSelected ? 'active' : ''}`;
+        card.onclick = () => selectCalendarDate(dateStr);
+
+        let statusText = '';
+        let statusClass = '';
+
+        try {
+          const compRes = await fetch(`${FIREBASE_ROOT}/studentCompletions/${currentStudent}/${dateStr}.json`);
+          const compData = await compRes.json();
+          if (compData) {
+            if (compData.p1 && compData.p2) {
+              statusText = '🏆全通關'; statusClass = 'status-badge-complete';
+            } else if (compData.p1) {
+              statusText = '✅注音'; statusClass = 'status-badge-part';
+            } else if (compData.p2) {
+              statusText = '✅消消樂'; statusClass = 'status-badge-part';
+            }
+          }
+        } catch(e){}
+
+        card.innerHTML = `
+          <div class="day-name">週${dayNames[i]}</div>
+          <div class="day-date">${d.getDate()}</div>
+          <div class="day-status ${statusClass}">${statusText}</div>
+        `;
+        grid.appendChild(card);
+      }
+    }
+
+    function selectCalendarDate(dateStr) {
+      selectedDateObj = new Date(dateStr);
+      document.getElementById('studentDatePicker').value = dateStr;
+      loadStudentTasks();
+    }
+
+    function syncDateFromPicker() {
+      const val = document.getElementById('studentDatePicker').value;
+      if (val) {
+        selectedDateObj = new Date(val);
+        setWeekStartFromDate(selectedDateObj);
+        loadStudentTasks();
+      }
+    }
+
+    async function fetchStudentsList() {
+      try {
+        const res = await fetch(`${FIREBASE_ROOT}/students.json`);
+        const data = await res.json();
+        studentsList = (data && Array.isArray(data)) ? data : ["Evan"];
+      } catch(e) { studentsList = ["Evan"]; }
+      renderStudentDropdowns();
+    }
+
+    function renderStudentDropdowns() {
+      const select = document.getElementById('studentSelect');
+      const filter = document.getElementById('adminStudentFilter');
+      select.innerHTML = "";
+      filter.innerHTML = '<option value="ALL">全部學生彙總</option><option value="TEST_MODE">🧪 老師測試紀錄</option>';
+
+      studentsList.forEach(name => {
+        const opt = document.createElement('option'); opt.value = name; opt.textContent = name; select.appendChild(opt);
+        const opt2 = document.createElement('option'); opt2.value = name; opt2.textContent = `👦 ${name} 的數據`; filter.appendChild(opt2);
+      });
+      select.value = currentStudent;
+      document.getElementById('targetPrompt').textContent = `👦 ${currentStudent}，請拼出這個詞的注音：`;
+    }
+
+    async function addNewStudent() {
+      const name = prompt("請輸入新學生姓名：");
+      if (!name || !name.trim()) return;
+      const cleanName = name.trim();
+      if (!studentsList.includes(cleanName)) {
+        studentsList.push(cleanName);
+        await fetch(`${FIREBASE_ROOT}/students.json`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(studentsList) });
+        currentStudent = cleanName; renderStudentDropdowns(); loadStudentTasks();
+      }
+    }
+
+    function changeCurrentStudent() {
+      currentStudent = document.getElementById('studentSelect').value;
+      document.getElementById('targetPrompt').textContent = `👦 ${currentStudent}，請拼出這個詞的注音：`;
+      loadStudentTasks();
+    }
+
+    function handleAdminAccess() {
+      if (isAdmin) {
+        isAdmin = false;
+        document.getElementById('adminView').classList.remove('active');
+        document.getElementById('studentView').classList.add('active');
+        document.getElementById('userSelectBar').style.display = 'flex';
+        document.getElementById('toggleAdminBtn').textContent = "👑 老師後台";
+        document.getElementById('appTitle').textContent = "🎮 學生注音與意思練習";
+        loadStudentTasks();
+      } else {
+        const pwd = prompt("請輸入老師後台密碼：");
+        if (pwd === "1214") {
+          isAdmin = true;
+          document.getElementById('studentView').classList.remove('active');
+          document.getElementById('adminView').classList.add('active');
+          document.getElementById('userSelectBar').style.display = 'none';
+          document.getElementById('toggleAdminBtn').textContent = "🎮 切換回學生端";
+          document.getElementById('appTitle').textContent = "👑 老師後台與數據統計";
+          loadAdminTasks();
+        } else if (pwd !== null) alert("❌ 密碼錯誤！");
+      }
+    }
+
+    function switchPracticeMode(mode) {
+      currentPracticeMode = mode;
+      document.getElementById('btnMode0').classList.toggle('active', mode === 0);
+      document.getElementById('btnMode1').classList.toggle('active', mode === 1);
+      document.getElementById('btnMode2').classList.toggle('active', mode === 2);
+
+      document.getElementById('practiceMode0').style.display = mode === 0 ? 'block' : 'none';
+      document.getElementById('practiceMode1').style.display = mode === 1 ? 'block' : 'none';
+      document.getElementById('practiceMode2').style.display = mode === 2 ? 'block' : 'none';
+
+      if (mode === 0) updateFlashcardUI();
+      if (mode === 2) initMatchGame();
+    }
+
+    function updateFlashcardUI() {
+      if (taskKeysArr.length === 0) {
+        document.getElementById('fcWord').textContent = "無題目";
+        document.getElementById('fcZhuyin').textContent = "";
+        document.getElementById('fcMeaning').textContent = "無內容";
+        document.getElementById('cardProgress').textContent = "0 / 0";
+        return;
+      }
+
+      document.getElementById('flashcard').classList.remove('flipped');
+      const task = currentTasks[taskKeysArr[flashcardIndex]];
+      document.getElementById('fcWord').textContent = task.text || "";
+      document.getElementById('fcZhuyin').textContent = task.zhuyin || "";
+      document.getElementById('fcMeaning').textContent = task.meaning || "尚未補充意思解釋";
+      document.getElementById('cardProgress').textContent = `${flashcardIndex + 1} / ${taskKeysArr.length}`;
+    }
+
+    function toggleCardFlip() { document.getElementById('flashcard').classList.toggle('flipped'); }
+    function prevFlashcard() { if (taskKeysArr.length > 0) { flashcardIndex = (flashcardIndex - 1 + taskKeysArr.length) % taskKeysArr.length; updateFlashcardUI(); } }
+    function nextFlashcard() { if (taskKeysArr.length > 0) { flashcardIndex = (flashcardIndex + 1) % taskKeysArr.length; updateFlashcardUI(); } }
+
+    function playCurrentCardTTS(side) {
+      if (taskKeysArr.length === 0) return;
+      const task = currentTasks[taskKeysArr[flashcardIndex]];
+      if (side === 'front') speakTTS(task.text);
+      else speakTTS(`${task.text}，${task.meaning || '無內容'}`);
+    }
+
+    function initMatchGame() {
+      const wordsCol = document.getElementById('wordsColumn');
+      const meaningsCol = document.getElementById('meaningsColumn');
+      const msgEl = document.getElementById('matchResultMessage');
+
+      wordsCol.innerHTML = ''; meaningsCol.innerHTML = ''; msgEl.textContent = '';
+      selectedWordCard = null; selectedMeaningCard = null;
+
+      const validTasks = taskKeysArr.map(k => ({ id: k, ...currentTasks[k] })).filter(t => t.text && t.meaning);
+      if (validTasks.length === 0) {
+        wordsCol.innerHTML = '<div style="color:#64748b; padding:20px;">沒有包含意思解釋的詞語！</div>';
+        return;
+      }
+
+      const shuffledWords = [...validTasks].sort(() => Math.random() - 0.5);
+      const shuffledMeanings = [...validTasks].sort(() => Math.random() - 0.5);
+
+      shuffledWords.forEach(item => {
+        const card = document.createElement('div');
+        card.className = `match-card ${matchMatchedIds.has(item.id) ? 'matched' : ''}`;
+        card.dataset.id = item.id;
+        card.innerHTML = `<div>${item.text}</div><div style="font-size:12px; color:#64748b;">(${item.zhuyin||''})</div>`;
+        card.onclick = () => selectWordCard(card);
+        wordsCol.appendChild(card);
+      });
+
+      shuffledMeanings.forEach(item => {
+        const card = document.createElement('div');
+        card.className = `match-card ${matchMatchedIds.has(item.id) ? 'matched' : ''}`;
+        card.dataset.id = item.id;
+        card.innerHTML = `<div>📖 ${item.meaning}</div>`;
+        card.onclick = () => selectMeaningCard(card);
+        meaningsCol.appendChild(card);
+      });
+    }
+
+    function selectWordCard(card) {
+      if (card.classList.contains('matched')) return;
+      if (selectedWordCard) selectedWordCard.classList.remove('selected');
+      selectedWordCard = card; selectedWordCard.classList.add('selected');
+      checkMatchPair();
+    }
+
+    function selectMeaningCard(card) {
+      if (card.classList.contains('matched')) return;
+      if (selectedMeaningCard) selectedMeaningCard.classList.remove('selected');
+      selectedMeaningCard = card; selectedMeaningCard.classList.add('selected');
+      checkMatchPair();
+    }
+
+    async function checkMatchPair() {
+      if (!selectedWordCard || !selectedMeaningCard) return;
+
+      const wordId = selectedWordCard.dataset.id;
+      const meaningId = selectedMeaningCard.dataset.id;
+      const card1 = selectedWordCard; const card2 = selectedMeaningCard;
+      selectedWordCard = null; selectedMeaningCard = null;
+
+      const selectedDate = formatDateStr(selectedDateObj);
+
+      if (wordId === meaningId) {
+        playSfx('correct');
+        card1.classList.remove('selected'); card2.classList.remove('selected');
+        card1.classList.add('matched'); card2.classList.add('matched');
+        
+        matchMatchedIds.add(wordId);
+        recordFirebaseStat(selectedDate, wordId, 'part2', 'correct');
+
+        const validTasksCount = taskKeysArr.filter(k => currentTasks[k].text && currentTasks[k].meaning).length;
+        if (matchMatchedIds.size === validTasksCount) {
+          isPart2Completed = true;
+          await saveCompletionToFirebase('p2', true);
+          document.getElementById('badgePart2').style.display = 'inline-block';
+          renderWeekCalendar();
+          document.getElementById('modalTitle').textContent = `🎉 ${currentStudent} 詞義消消樂全通關！`;
+          document.getElementById('completionSummary').textContent = `成功配對並消除了所有的詞語與意思！`;
+          speakTTS(`${currentStudent}太棒了！完成了詞義消消樂！`, 0.8);
+          setTimeout(() => document.getElementById('completionModal').classList.add('active'), 600);
+        }
+      } else {
+        playSfx('wrong');
+        card1.classList.remove('selected'); card2.classList.remove('selected');
+        card1.classList.add('error-shake'); card2.classList.add('error-shake');
+        recordFirebaseStat(selectedDate, wordId, 'part2', 'wrong');
+        setTimeout(() => { card1.classList.remove('error-shake'); card2.classList.remove('error-shake'); }, 400);
+      }
+    }
+
+    async function saveCompletionToFirebase(partKey, isDone) {
+      const selectedDate = formatDateStr(selectedDateObj);
+      try {
+        await fetch(`${FIREBASE_ROOT}/studentCompletions/${currentStudent}/${selectedDate}/${partKey}.json`, {
+          method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(isDone)
+        });
+      } catch(e){}
+    }
+
+    async function recordFirebaseStat(date, taskId, partKey, field) {
+      try {
+        const statRes = await fetch(`${FIREBASE_ROOT}/dailyTasks/${date}/${taskId}/studentStats/${currentStudent}/${partKey}_${field}.json`);
+        const currentCount = (await statRes.json()) || 0;
+        await fetch(`${FIREBASE_ROOT}/dailyTasks/${date}/${taskId}/studentStats/${currentStudent}/${partKey}_${field}.json`, {
+          method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(currentCount + 1)
+        });
+      } catch(e){}
+    }
+
+    async function loadStudentTasks() {
+      const selectedDate = formatDateStr(selectedDateObj);
+      const selectorEl = document.getElementById('taskSelector');
+
+      try {
+        const res = await fetch(`${FIREBASE_ROOT}/dailyTasks/${selectedDate}.json`);
+        const data = await res.json() || {};
+        currentTasks = data; taskKeysArr = Object.keys(data);
+        taskStatusMap = {}; taskWrongCountMap = {}; matchMatchedIds.clear();
+
+        try {
+          const compRes = await fetch(`${FIREBASE_ROOT}/studentCompletions/${currentStudent}/${selectedDate}.json`);
+          const compData = await compRes.json() || {};
+          isPart1Completed = !!compData.p1;
+          isPart2Completed = !!compData.p2;
+        } catch(e){ isPart1Completed = false; isPart2Completed = false; }
+
+        document.getElementById('badgePart1').style.display = isPart1Completed ? 'inline-block' : 'none';
+        document.getElementById('badgePart2').style.display = isPart2Completed ? 'inline-block' : 'none';
+
+        renderWeekCalendar();
+
+        selectorEl.innerHTML = "";
+        if (taskKeysArr.length === 0) {
+          selectorEl.innerHTML = "<span style='color:#64748b; font-size:13px;'>無練習任務！</span>";
+          document.getElementById('displayWord').textContent = "無任務";
+          currentTaskId = null; 
+          updateFlashcardUI();
+          if (currentPracticeMode === 2) initMatchGame();
+          return;
+        }
+
+        taskKeysArr.forEach((id, idx) => renderTaskChip(id, idx, data[id]));
+        selectTask(taskKeysArr[0]);
+        flashcardIndex = 0; 
+
+        // 🌟 關鍵修復：載入完新日期的資料後，保持學生原本停留在的模式！
+        switchPracticeMode(currentPracticeMode);
+
+      } catch(e){}
+    }
+
+    function renderTaskChip(id, idx, taskData) {
+      const selectorEl = document.getElementById('taskSelector');
+      let chip = document.getElementById(`chip-${id}`) || document.createElement('div');
+      chip.id = `chip-${id}`; if (!chip.parentNode) selectorEl.appendChild(chip);
+
+      const status = taskStatusMap[id];
+      let statusHtml = status === 'correct' ? '<span style="color:#16a34a;">✓</span>' : status === 'wrong' ? '<span style="color:#dc2626;">✗</span>' : '';
+      chip.className = `task-chip ${id === currentTaskId ? 'active' : ''}`;
+      chip.innerHTML = `<span>${idx + 1}. ${taskData.text}</span> ${statusHtml}`;
+      chip.onclick = () => selectTask(id);
+    }
+
+    function selectTask(id) {
+      currentTaskId = id;
+      taskKeysArr.forEach((k, idx) => renderTaskChip(k, idx, currentTasks[k]));
+      currentTaskText = currentTasks[id].text;
+      document.getElementById('displayWord').textContent = currentTaskText;
+      correctZhuyinAnswer = cleanFormat(currentTasks[id].zhuyin || "");
+
+      const meaningEl = document.getElementById('meaningDisplay');
+      if (taskStatusMap[id] === 'correct' && currentTasks[id].meaning) {
+        meaningEl.innerHTML = `📖 <b>詞語意思：</b> ${currentTasks[id].meaning}`;
+        meaningEl.classList.add('active');
+      } else meaningEl.classList.remove('active');
+
+      userTyped = ""; updateDisplay(); document.getElementById('resultMessage').textContent = "";
+    }
+
+    async function checkAnswer() {
+      const msgEl = document.getElementById('resultMessage');
+      if (!userTyped || !currentTaskId) return msgEl.textContent = "⚠️ 請先輸入注音！";
+      const selectedDate = formatDateStr(selectedDateObj);
+      const isCorrect = (cleanFormat(userTyped) === cleanFormat(correctZhuyinAnswer));
+
+      if (isCorrect) {
+        playSfx('correct'); msgEl.className = "message success"; msgEl.innerHTML = "🎉 太棒了！答對了！";
+        taskStatusMap[currentTaskId] = 'correct'; recordFirebaseStat(selectedDate, currentTaskId, 'part1', 'correct');
+
+        if (currentTasks[currentTaskId].meaning) {
+          const meaningEl = document.getElementById('meaningDisplay');
+          meaningEl.innerHTML = `📖 <b>詞語意思：</b> ${currentTasks[currentTaskId].meaning}`;
+          meaningEl.classList.add('active');
+        }
+
+        renderTaskChip(currentTaskId, taskKeysArr.indexOf(currentTaskId), currentTasks[currentTaskId]);
+
+        if (taskKeysArr.every(id => taskStatusMap[id] === 'correct')) {
+          isPart1Completed = true;
+          await saveCompletionToFirebase('p1', true);
+          document.getElementById('badgePart1').style.display = 'inline-block';
+          renderWeekCalendar();
+          document.getElementById('modalTitle').textContent = `🎉 ${currentStudent} 注音拼音全數通過！`;
+          document.getElementById('completionSummary').textContent = `成功拼出全部注音詞語！`;
+          speakTTS(`${currentStudent}太棒了！答對了所有的注音題目！`, 0.8);
+          setTimeout(() => document.getElementById('completionModal').classList.add('active'), 600);
+        } else {
+          setTimeout(autoNextTask, 1000);
+        }
+      } else {
+        playSfx('wrong'); msgEl.className = "message error"; taskStatusMap[currentTaskId] = 'wrong';
+        recordFirebaseStat(selectedDate, currentTaskId, 'part1', 'wrong');
+        taskWrongCountMap[currentTaskId] = (taskWrongCountMap[currentTaskId] || 0) + 1;
+        msgEl.innerHTML = taskWrongCountMap[currentTaskId] === 1 ? `❌ 不太對喔，再試一次！` : `❌ 不太對！<br><button class="btn-show-answer" onclick="revealAnswer()">💡 顯示正確答案</button>`;
+        renderTaskChip(currentTaskId, taskKeysArr.indexOf(currentTaskId), currentTasks[currentTaskId]);
+      }
+    }
+
+    function autoNextTask() {
+      const currIdx = taskKeysArr.indexOf(currentTaskId);
+      for (let i = currIdx + 1; i < taskKeysArr.length; i++) if (taskStatusMap[taskKeysArr[i]] !== 'correct') return selectTask(taskKeysArr[i]);
+      for (let i = 0; i < currIdx; i++) if (taskStatusMap[taskKeysArr[i]] !== 'correct') return selectTask(taskKeysArr[i]);
+    }
+
+    function revealAnswer() { document.getElementById('resultMessage').innerHTML = `💡 正確答案：<b>${correctZhuyinAnswer}</b>`; }
+    function playZhuyinAudio(sym) { if (audioCache[sym]) { audioCache[sym].currentTime = 0; audioCache[sym].play().catch(() => speakTTS(sym)); } else speakTTS(sym); }
+    
+    function speakTTS(text, rate = 0.7) {
+      window.speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(text); u.lang = 'zh-TW'; u.rate = rate; window.speechSynthesis.speak(u);
+    }
+    function playWordTTS() { if (currentTaskText) speakTTS(currentTaskText, 0.7); }
+
+    function renderKeyboard() {
+      const kbContainer = document.getElementById('keyboard'); kbContainer.innerHTML = '';
+      STANDARD_KEYBOARD_ROWS.forEach(rowSymbols => {
+        const rowEl = document.createElement('div'); rowEl.className = 'kb-row';
+        rowSymbols.forEach(symbol => {
+          const btn = document.createElement('button'); btn.className = ['ˊ','ˇ','ˋ','˙'].includes(symbol) ? 'key-btn tone' : 'key-btn';
+          btn.textContent = symbol; btn.onclick = () => { playZhuyinAudio(symbol); userTyped += symbol; updateDisplay(); };
+          rowEl.appendChild(btn);
+        });
+        kbContainer.appendChild(rowEl);
+      });
+      const actionRow = document.createElement('div'); actionRow.className = 'kb-row';
+      actionRow.innerHTML = `
+        <button class="key-btn action" onclick="userTyped=userTyped.slice(0,-1);updateDisplay();">⌫ 刪除</button>
+        <button class="key-btn action" onclick="userTyped='';updateDisplay();">清空</button>
+        <button class="key-btn submit" onclick="checkAnswer()">選好確認 ✔</button>
+      `;
+      kbContainer.appendChild(actionRow);
+    }
+
+    function updateDisplay() { document.getElementById('userInputDisplay').textContent = userTyped; }
+    function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+
+    /* 👑 後台管理 */
+    async function loadAdminTasks() {
+      const date = document.getElementById('adminDatePicker').value;
+      const selectedFilter = document.getElementById('adminStudentFilter').value;
+      if (!date) return;
+
+      const listEl = document.getElementById('adminTaskList');
+      listEl.innerHTML = "<li>載入中...</li>";
+
+      try {
+        const res = await fetch(`${FIREBASE_ROOT}/dailyTasks/${date}.json`);
+        const data = await res.json() || {};
+        currentTasks = data; listEl.innerHTML = "";
+        const keys = Object.keys(data);
+
+        if (keys.length === 0) return listEl.innerHTML = "<li style='color:#64748b;'>無任務！</li>";
+
+        keys.forEach((id, index) => {
+          const item = data[id];
+          let p1_c = 0, p1_w = 0, p2_c = 0, p2_w = 0;
+
+          if (item.studentStats) {
+            if (selectedFilter === "ALL") {
+              Object.keys(item.studentStats).forEach(st => {
+                p1_c += item.studentStats[st].part1_correct || 0;
+                p1_w += item.studentStats[st].part1_wrong || 0;
+                p2_c += item.studentStats[st].part2_correct || 0;
+                p2_w += item.studentStats[st].part2_wrong || 0;
+              });
+            } else if (item.studentStats[selectedFilter]) {
+              p1_c = item.studentStats[selectedFilter].part1_correct || 0;
+              p1_w = item.studentStats[selectedFilter].part1_wrong || 0;
+              p2_c = item.studentStats[selectedFilter].part2_correct || 0;
+              p2_w = item.studentStats[selectedFilter].part2_wrong || 0;
+            }
+          }
+
+          const li = document.createElement('li');
+          li.className = 'task-item';
+          li.innerHTML = `
+            <div style="display:flex; align-items:center; gap:8px;">
+              <input type="checkbox" class="task-checkbox" data-id="${id}">
+              <div>
+                <b>${index + 1}. ${item.text}</b> <span style="font-size:12px; color:#64748b;">(${item.zhuyin || '未設定'})</span>
+                <br><span style="font-size:12px; color:#475569;">📖 ${item.meaning || '無解釋'}</span>
+                <div style="margin-top:4px;">
+                  <span style="font-size:11px; font-weight:bold; color:#475569;">第一部分:</span>
+                  <span class="stat-badge badge-correct">對:${p1_c}</span><span class="stat-badge badge-wrong">錯:${p1_w}</span> | 
+                  <span style="font-size:11px; font-weight:bold; color:#475569;">第二部分:</span>
+                  <span class="stat-badge badge-correct">配對:${p2_c}</span><span class="stat-badge badge-wrong">錯:${p2_w}</span>
+                </div>
+              </div>
+            </div>
+            <div>
+              <button class="btn-edit" onclick="openTaskEdit('${id}')">✏️ 編輯</button>
+              <button class="btn-del" onclick="deleteTask('${id}')">刪除</button>
+            </div>
+          `;
+          listEl.appendChild(li);
+        });
+      } catch(e){}
+    }
+
+    function toggleSelectAll(masterCb) { document.querySelectorAll('.task-checkbox').forEach(cb => cb.checked = masterCb.checked); }
+
+    async function deleteSelectedTasks() {
+      const cbs = document.querySelectorAll('.task-checkbox:checked');
+      if (cbs.length === 0) return alert("請勾選要刪除的題目！");
+      if (!confirm(`確定要刪除選取的 ${cbs.length} 筆題目嗎？`)) return;
+
+      const date = document.getElementById('adminDatePicker').value;
+      const promises = Array.from(cbs).map(cb => fetch(`${FIREBASE_ROOT}/dailyTasks/${date}/${cb.dataset.id}.json`, { method: 'DELETE' }));
+      await Promise.all(promises); loadAdminTasks();
+    }
+
+    function openTaskEdit(taskId) {
+      editingTaskId = taskId; const task = currentTasks[taskId]; if (!task) return;
+      document.getElementById('editTaskText').value = task.text || "";
+      document.getElementById('editTaskZhuyin').value = task.zhuyin || "";
+      document.getElementById('editTaskMeaning').value = task.meaning || "";
+      document.getElementById('editModal').classList.add('active');
+    }
+
+    async function saveTaskEdit() {
+      if (!editingTaskId) return;
+      const date = document.getElementById('adminDatePicker').value;
+      await fetch(`${FIREBASE_ROOT}/dailyTasks/${date}/${editingTaskId}.json`, {
+        method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          text: document.getElementById('editTaskText').value.trim(),
+          zhuyin: cleanFormat(document.getElementById('editTaskZhuyin').value.trim()),
+          meaning: document.getElementById('editTaskMeaning').value.trim()
+        })
+      });
+      closeModal('editModal'); loadAdminTasks();
+    }
+
+    async function addTask() {
+      const date = document.getElementById('adminDatePicker').value;
+      const text = document.getElementById('newTaskInput').value.trim();
+      const zhuyin = cleanFormat(document.getElementById('newTaskZhuyin').value.trim());
+      const meaning = document.getElementById('newTaskMeaning').value.trim();
+      if (!text || !zhuyin) return alert("請填寫國字與注音！");
+
+      await fetch(`${FIREBASE_ROOT}/dailyTasks/${date}.json`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text, zhuyin, meaning, timestamp: Date.now() })
+      });
+      document.getElementById('newTaskInput').value = ""; document.getElementById('newTaskZhuyin').value = ""; document.getElementById('newTaskMeaning').value = "";
+      loadAdminTasks();
+    }
+
+    async function addBatchTasks() {
+      const date = document.getElementById('adminDatePicker').value;
+      const lines = document.getElementById('batchInput').value.trim().split('\n');
+      for (let line of lines) {
+        const cols = line.trim().split(/\t|,/); if (!cols[0]) continue;
+        let zhuyin = cols[1] ? cleanFormat(cols[1].trim()) : '';
+        if (!zhuyin && window.pinyinpro) zhuyin = cleanFormat(window.pinyinpro.pinyin(cols[0].trim(), { type: 'zhuyin' }));
+        await fetch(`${FIREBASE_ROOT}/dailyTasks/${date}.json`, {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text: cols[0].trim(), zhuyin, meaning: cols[2] ? cols[2].trim() : "", timestamp: Date.now() })
+        });
+      }
+      document.getElementById('batchInput').value = ""; loadAdminTasks();
+    }
+
+    async function deleteTask(taskId) {
+      if (!confirm("確定刪除？")) return;
+      const date = document.getElementById('adminDatePicker').value;
+      await fetch(`${FIREBASE_ROOT}/dailyTasks/${date}/${taskId}.json`, { method: 'DELETE' }); loadAdminTasks();
+    }
+
+    function switchAddTab(type) {
+      document.querySelectorAll('.tab-btn').forEach((b,i) => b.classList.toggle('active', (i===0&&type==='single')||(i===1&&type==='batch')));
+      document.getElementById('tabSingle').classList.toggle('active', type==='single');
+      document.getElementById('tabBatch').classList.toggle('active', type==='batch');
+    }
+
+    function autoFillZhuyin() {
+      const text = document.getElementById('newTaskInput').value.trim();
+      if (text && window.pinyinpro) document.getElementById('newTaskZhuyin').value = cleanFormat(window.pinyinpro.pinyin(text, { type: 'zhuyin' }));
+    }
+
+    window.onload = init;
+  </script>
+</body>
+</html>
